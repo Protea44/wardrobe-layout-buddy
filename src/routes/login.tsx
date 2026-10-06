@@ -5,7 +5,7 @@ import { pageHead } from "@/config/site";
 export const Route = createFileRoute("/login")({
   head: () => pageHead("Anmelden", "Die Anmeldeseite für deinen privaten Bereich bei Kleiderschrank Kompakt."),
   validateSearch: (search: Record<string, unknown>) => ({
-    ...(typeof search.mode === "string" ? { mode: search.mode } : {}),
+    ...(typeof search["mode"] === "string" ? { mode: search["mode"] } : {}),
   }),
   component: LoginPage,
 });
