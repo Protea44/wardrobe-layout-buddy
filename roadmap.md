@@ -1,6 +1,6 @@
 # Base layout and routing
-- [ ] Brand tokens and local fonts
-- [ ] Shared header, logo, accessible mobile menu and skip link
-- [ ] Shared footer
-- [ ] Seven placeholder routes, page metadata and German 404
-- [ ] Verify navigation and keyboard flows on desktop/mobile
+- [x] Brand tokens and local fonts
+- [x] Shared header, logo, accessible mobile menu and skip link
+- [x] Shared footer
+- [x] Seven placeholder routes, page metadata and German 404
+- [x] Verify navigation and keyboard flows on desktop/mobile
