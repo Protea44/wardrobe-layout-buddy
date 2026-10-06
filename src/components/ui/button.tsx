@@ -18,6 +18,7 @@ const buttonVariants = cva(
         link: "text-primary underline-offset-4 hover:underline",
         footerLink: "h-auto justify-start rounded-none p-0 text-inverse-foreground font-normal hover:underline underline-offset-4 decoration-gold",
         menu: "text-inverse-foreground hover:bg-inverse-foreground/10",
+        mobileTrigger: "hidden max-md:inline-flex hover:bg-accent hover:text-accent-foreground",
         inverse: "bg-gold text-navy hover:bg-gold/90",
       },
       size: {
@@ -25,6 +26,7 @@ const buttonVariants = cva(
         sm: "h-8 rounded-md px-3 text-xs",
         lg: "h-10 rounded-md px-8",
         icon: "h-9 w-9",
+        link: "h-auto p-0",
       },
     },
     defaultVariants: {

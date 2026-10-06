@@ -18,7 +18,7 @@ export function MobileNavigation() {
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
       <Dialog.Trigger asChild>
-        <Button variant="ghost" size="icon" className="mobile-trigger" aria-label="Menü öffnen" aria-expanded={open} aria-controls="mobile-navigation">
+        <Button variant="mobileTrigger" size="icon" aria-label="Menü öffnen" aria-expanded={open} aria-controls="mobile-navigation">
           <Menu aria-hidden="true" />
         </Button>
       </Dialog.Trigger>
