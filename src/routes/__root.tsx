@@ -18,10 +18,10 @@ import { Button } from "@/components/ui/button";
 
 function NotFoundComponent() {
   return (
-    <>
+    <div className="site-container page-body">
       <h1 className="page-title">Seite nicht gefunden</h1>
       <Button asChild className="not-found-link"><Link to="/">Zur Startseite</Link></Button>
-    </>
+    </div>
   );
 }
 
@@ -102,7 +102,7 @@ function RootComponent() {
       <div className="site-shell">
         <a className="skip-link" href="#main-content">Zum Inhalt springen</a>
         <Header />
-        <main id="main-content" className="site-main site-container" tabIndex={-1}>
+        <main id="main-content" className="site-main" tabIndex={-1}>
           <Outlet />
         </main>
         <Footer />

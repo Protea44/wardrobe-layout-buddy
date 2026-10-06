@@ -14,9 +14,9 @@ export const Route = createFileRoute("/$")({
 
 function NotFoundPage() {
   return (
-    <>
+    <div className="site-container page-body">
       <h1 className="page-title">Seite nicht gefunden</h1>
       <Button asChild className="not-found-link"><Link to="/">Zur Startseite</Link></Button>
-    </>
+    </div>
   );
 }
