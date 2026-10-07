@@ -167,6 +167,34 @@ describe("outfit routes", () => {
     }
   });
 
+  it("returns the existing outfit when a create with the same client id is retried", async () => {
+    const shirt = await createItem(a, "Hemd");
+    const id = "1f2e3d4c-5b6a-4987-8a6b-5c4d3e2f1a0b";
+    const body = { id, name: "Büro", items: [place(shirt)] };
+
+    const first = await request("POST", "/api/outfits", a.cookie, body);
+    const retry = await request("POST", "/api/outfits", a.cookie, body);
+    const foreign = await request("POST", "/api/outfits", b.cookie, { ...body, items: [] });
+
+    expect(first.statusCode).toBe(201);
+    expect(first.json<OutfitResponse>().id).toBe(id);
+    expect(retry.statusCode).toBe(200);
+    expect(retry.json<OutfitResponse>()).toEqual(first.json<OutfitResponse>());
+    expect(foreign.statusCode).toBe(404);
+    expect(await app.repositories.outfits.list(a.userId)).toHaveLength(1);
+    expect(await app.repositories.outfits.list(b.userId)).toEqual([]);
+  });
+
+  it("does not accept an id when replacing", async () => {
+    const outfit = await createOutfit(a);
+    const response = await request("PUT", `/api/outfits/${outfit.id}`, a.cookie, {
+      id: "1f2e3d4c-5b6a-4987-8a6b-5c4d3e2f1a0c",
+      name: "X",
+      items: [],
+    });
+    expect(response.statusCode).toBe(400);
+  });
+
   it("deletes an outfit and keeps its items", async () => {
     const shirt = await createItem(a, "Hemd");
     const outfit = await createOutfit(a, [place(shirt)]);

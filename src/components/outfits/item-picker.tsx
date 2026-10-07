@@ -5,7 +5,9 @@ import { useEffect, useId, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { SEARCH_DEBOUNCE_MS } from "@/config/wardrobe";
 import { ApiError } from "@/lib/api";
-import { fetchItemFacets, fetchItems, itemPhotoUrl, itemQueryKeys } from "@/lib/items-api";
+import { StoredImage } from "@/components/stored-image";
+import { itemQueryKeys } from "@/lib/items-api";
+import { loadItemFacets, loadItems } from "@/lib/offline/data";
 import type { PickedItem } from "@/lib/outfit-canvas";
 import type { WardrobeSearch } from "@/lib/wardrobe-search";
 
@@ -33,12 +35,12 @@ export function ItemPicker({ pickedIds, onPick }: ItemPickerProps) {
   };
   const list = useInfiniteQuery({
     queryKey: itemQueryKeys.list(search),
-    queryFn: ({ pageParam }) => fetchItems(search, pageParam),
+    queryFn: ({ pageParam }) => loadItems(search, pageParam),
     initialPageParam: null as string | null,
     getNextPageParam: (last) => last.nextCursor,
     placeholderData: keepPreviousData,
   });
-  const facets = useQuery({ queryKey: itemQueryKeys.facets, queryFn: fetchItemFacets });
+  const facets = useQuery({ queryKey: itemQueryKeys.facets, queryFn: loadItemFacets });
   const items = list.data?.pages.flatMap((page) => page.items) ?? [];
 
   return (
@@ -107,7 +109,7 @@ export function ItemPicker({ pickedIds, onPick }: ItemPickerProps) {
               >
                 <span className="item-picker-photo">
                   {item.thumbnailKey !== null && (
-                    <img src={itemPhotoUrl(item.thumbnailKey)} alt="" loading="lazy" />
+                    <StoredImage storageKey={item.thumbnailKey} alt="" loading="lazy" />
                   )}
                   {picked && (
                     <span className="item-picker-check">

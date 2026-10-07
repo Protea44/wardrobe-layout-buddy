@@ -1,5 +1,5 @@
 import { keepPreviousData, useInfiniteQuery, useQuery } from "@tanstack/react-query";
-import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useCallback } from "react";
 
 import type { ItemSort } from "@shared/item";
@@ -11,23 +11,21 @@ import { WardrobeGrid } from "@/components/wardrobe/wardrobe-grid";
 import { WardrobeToolbar } from "@/components/wardrobe/wardrobe-toolbar";
 import { pageHead } from "@/config/site";
 import { ApiError } from "@/lib/api";
-import { authClient } from "@/lib/auth-client";
-import { fetchItemFacets, fetchItems, itemQueryKeys } from "@/lib/items-api";
+import { itemQueryKeys } from "@/lib/items-api";
+import { loadItemFacets, loadItems } from "@/lib/offline/data";
 import {
   activeFilters,
   parseWardrobeSearch,
   withoutAllFilters,
   type WardrobeSearch,
 } from "@/lib/wardrobe-search";
+import { requireSession } from "@/lib/offline/session";
 
 export const Route = createFileRoute("/profil_/schrank/")({
   validateSearch: parseWardrobeSearch,
   head: () => pageHead("Mein Schrank", "Alle Teile in deinem privaten Kleiderschrank."),
-  // Private page: without a session the visitor is sent to the login.
-  beforeLoad: async () => {
-    const { data } = await authClient.getSession();
-    if (!data) throw redirect({ to: "/login" });
-  },
+  // Private page; offline it shows the offline copy.
+  beforeLoad: requireSession,
   component: WardrobePage,
 });
 
@@ -37,13 +35,13 @@ function WardrobePage() {
 
   const list = useInfiniteQuery({
     queryKey: itemQueryKeys.list(search),
-    queryFn: ({ pageParam }) => fetchItems(search, pageParam),
+    queryFn: ({ pageParam }) => loadItems(search, pageParam),
     initialPageParam: null as string | null,
     getNextPageParam: (last) => last.nextCursor,
     // Keeps the grid in place while a new filter loads.
     placeholderData: keepPreviousData,
   });
-  const facets = useQuery({ queryKey: itemQueryKeys.facets, queryFn: fetchItemFacets });
+  const facets = useQuery({ queryKey: itemQueryKeys.facets, queryFn: loadItemFacets });
 
   // Filters and sort add a history entry, so "back" undoes them. Typing does not.
   const update = useCallback(

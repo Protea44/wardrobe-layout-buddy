@@ -21,7 +21,7 @@ import {
   type ItemFormInput,
   type ItemFormValues,
 } from "@/lib/item-form";
-import { uploadItem } from "@/lib/items-api";
+import { createItem } from "@/lib/offline/mutations";
 
 const PHOTO_MISSING = "Bitte füge ein Foto hinzu.";
 const UNKNOWN_ERROR = "Das Teil konnte nicht gespeichert werden. Bitte versuche es erneut.";
@@ -44,7 +44,7 @@ export function ItemForm() {
     setSubmitError(null);
     setProgress(0);
     try {
-      const item = await uploadItem(
+      const item = await createItem(
         {
           photo: photo.photo.photo,
           thumbnail: photo.photo.thumbnail,

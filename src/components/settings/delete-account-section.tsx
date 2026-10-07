@@ -15,6 +15,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { ACCOUNT_DELETED_PARAM, accountDeletionScope } from "@/config/account";
 import { clearLocalData, deleteAccount } from "@/lib/account-api";
+import { useOnline } from "@/lib/offline/online";
+import { clearOfflineData } from "@/lib/offline/session";
 import { ApiError } from "@/lib/api";
 import { authClient } from "@/lib/auth-client";
 
@@ -22,13 +24,16 @@ const WRONG_PASSWORD = "Das Passwort ist nicht richtig.";
 const SIGN_IN_AGAIN = "Bitte melde dich zur Sicherheit erneut mit Google an.";
 
 // Ends with a full page load, so no cached data of the account survives.
-function leaveDeletedAccount() {
+async function leaveDeletedAccount() {
   clearLocalData();
+  await clearOfflineData().catch(() => {});
   window.location.replace(`/?${ACCOUNT_DELETED_PARAM}=1`);
 }
 
-export function DeleteAccountSection({ account }: { account: AccountResponse }) {
+// account is null while the profile cannot be loaded, e.g. offline.
+export function DeleteAccountSection({ account }: { account: AccountResponse | null }) {
   const id = useId();
+  const online = useOnline();
   const [open, setOpen] = useState(false);
   const [confirmation, setConfirmation] = useState("");
   const [password, setPassword] = useState("");
@@ -36,7 +41,8 @@ export function DeleteAccountSection({ account }: { account: AccountResponse }) 
   const [error, setError] = useState<string | null>(null);
 
   const confirmed = confirmation === ACCOUNT_DELETE_CONFIRMATION;
-  const ready = confirmed && (!account.hasPassword || password !== "");
+  const hasPassword = account?.hasPassword ?? true;
+  const ready = confirmed && (!hasPassword || password !== "");
 
   function reset(next: boolean) {
     if (deleting) return;
@@ -56,13 +62,13 @@ export function DeleteAccountSection({ account }: { account: AccountResponse }) 
     try {
       await deleteAccount({
         confirm: ACCOUNT_DELETE_CONFIRMATION,
-        ...(account.hasPassword && { password }),
+        ...(hasPassword && { password }),
       });
-      leaveDeletedAccount();
+      await leaveDeletedAccount();
     } catch (caught) {
       setDeleting(false);
       if (caught instanceof ApiError && caught.status === 403) {
-        setError(account.hasPassword ? WRONG_PASSWORD : SIGN_IN_AGAIN);
+        setError(hasPassword ? WRONG_PASSWORD : SIGN_IN_AGAIN);
       } else {
         setError(
           caught instanceof ApiError
@@ -88,10 +94,17 @@ export function DeleteAccountSection({ account }: { account: AccountResponse }) 
       </p>
       <Dialog open={open} onOpenChange={reset}>
         <DialogTrigger asChild>
-          <Button type="button" className="h-11 justify-self-start px-6">
+          <Button
+            type="button"
+            className="h-11 justify-self-start px-6"
+            disabled={!online || account === null}
+          >
             Konto löschen
           </Button>
         </DialogTrigger>
+        {!online && (
+          <p className="offline-note">Dein Konto kannst du nur mit Internetverbindung löschen.</p>
+        )}
         <DialogContent className="delete-account-dialog">
           <form onSubmit={(event) => void submit(event)} noValidate>
             <DialogHeader>
@@ -120,7 +133,7 @@ export function DeleteAccountSection({ account }: { account: AccountResponse }) 
               />
             </div>
 
-            {account.hasPassword ? (
+            {hasPassword ? (
               <div className="settings-field">
                 <label htmlFor={`${id}-password`} className="settings-label">
                   Dein Passwort

@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, Pencil } from "lucide-react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
@@ -10,24 +10,23 @@ import { DeleteItemDialog } from "@/components/items/delete-item-dialog";
 import { ItemEditForm } from "@/components/items/item-edit-form";
 import { ItemReceipt } from "@/components/items/item-receipt";
 import { ItemStatus } from "@/components/items/item-status";
+import { StoredImage } from "@/components/stored-image";
 import { Button } from "@/components/ui/button";
 import { seasonLabels } from "@/config/items";
 import { pageHead } from "@/config/site";
 import { ApiError } from "@/lib/api";
-import { authClient } from "@/lib/auth-client";
 import { formatDate, formatPrice } from "@/lib/format";
-import { fetchItem, itemPhotoUrl, itemQueryKeys } from "@/lib/items-api";
+import { itemQueryKeys } from "@/lib/items-api";
+import { loadItem } from "@/lib/offline/data";
 import { parseWardrobeSearch } from "@/lib/wardrobe-search";
+import { requireSession } from "@/lib/offline/session";
 
 export const Route = createFileRoute("/profil_/schrank/$id")({
   // The wardrobe's filters ride along, so "Zurück zum Schrank" restores them.
   validateSearch: parseWardrobeSearch,
   head: () => pageHead("Teil", "Ein Teil aus deinem privaten Kleiderschrank."),
-  // Private page: without a session the visitor is sent to the login.
-  beforeLoad: async () => {
-    const { data } = await authClient.getSession();
-    if (!data) throw redirect({ to: "/login" });
-  },
+  // Private page; offline it shows the offline copy.
+  beforeLoad: requireSession,
   component: ItemPage,
 });
 
@@ -58,7 +57,7 @@ function ItemPage() {
   const search = Route.useSearch();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const item = useQuery({ queryKey: itemQueryKeys.detail(id), queryFn: () => fetchItem(id) });
+  const item = useQuery({ queryKey: itemQueryKeys.detail(id), queryFn: () => loadItem(id) });
   const [editing, setEditing] = useState(false);
   const heading = useRef<HTMLHeadingElement>(null);
   const notFound = item.error instanceof ApiError && item.error.status === 404;
@@ -116,7 +115,11 @@ function ItemPage() {
         <article className="item-detail">
           <div className="item-detail-photo">
             {item.data.photoKey !== null ? (
-              <img src={itemPhotoUrl(item.data.photoKey)} alt={`Foto: ${item.data.name}`} />
+              <StoredImage
+                storageKey={item.data.photoKey}
+                fallbackKey={item.data.thumbnailKey}
+                alt={`Foto: ${item.data.name}`}
+              />
             ) : (
               <p className="receipt-muted">Kein Foto</p>
             )}

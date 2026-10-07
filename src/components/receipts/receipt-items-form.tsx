@@ -22,6 +22,7 @@ import {
   type ReceiptItemsFormInput,
   type ReceiptItemsFormValues,
 } from "@/lib/receipt-items-form";
+import { useOnline } from "@/lib/offline/online";
 import { createReceiptItems, receiptFileUrl } from "@/lib/receipts-api";
 
 const categoryOptions = itemCategories.map((category) => ({ value: category, label: category }));
@@ -191,6 +192,7 @@ export function ReceiptItemsForm({ receipt, onSaved, onCancel }: ReceiptItemsFor
     }
   }
 
+  const online = useOnline();
   const uploading = progress !== null;
   const photoBusy = Object.values(photos).some((photo) => photo.busy);
   const percent = Math.round((progress ?? 0) * 100);
@@ -255,6 +257,9 @@ export function ReceiptItemsForm({ receipt, onSaved, onCancel }: ReceiptItemsFor
           <p className="sr-only" role="status">
             {uploading ? "Deine Teile werden gespeichert." : ""}
           </p>
+          {!online && (
+            <p className="offline-note">Zum Speichern brauchst du eine Internetverbindung.</p>
+          )}
           {submitError !== null && (
             <p className="form-error" role="alert">
               {submitError}
@@ -273,7 +278,7 @@ export function ReceiptItemsForm({ receipt, onSaved, onCancel }: ReceiptItemsFor
             <Button
               type="submit"
               className="h-12 flex-1 text-base"
-              disabled={uploading || photoBusy}
+              disabled={uploading || photoBusy || !online}
             >
               {uploading ? "Wird gespeichert …" : "Teile speichern"}
             </Button>

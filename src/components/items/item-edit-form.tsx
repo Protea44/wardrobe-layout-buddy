@@ -19,7 +19,8 @@ import {
   type ItemFormInput,
   type ItemFormValues,
 } from "@/lib/item-form";
-import { itemPhotoUrl, replaceItemPhoto, updateItem } from "@/lib/items-api";
+import { useStoredImageUrl } from "@/lib/offline/images";
+import { editItem } from "@/lib/offline/mutations";
 
 const UNKNOWN_ERROR = "Die Änderungen konnten nicht gespeichert werden. Bitte versuche es erneut.";
 
@@ -46,16 +47,13 @@ export function ItemEditForm({ item, onSaved, onCancel }: ItemEditFormProps) {
     setSubmitError(null);
     setSaving(true);
     try {
-      let updated = await updateItem(item.id, toItemEditInput(values));
-      if (photo.photo !== null) {
-        setProgress(0);
-        updated = await replaceItemPhoto(
-          item.id,
-          { photo: photo.photo.photo, thumbnail: photo.photo.thumbnail },
-          { onProgress: setProgress },
-        );
-      }
-      onSaved(updated);
+      const newPhoto = photo.photo && {
+        photo: photo.photo.photo,
+        thumbnail: photo.photo.thumbnail,
+      };
+      if (newPhoto) setProgress(0);
+      // Offline, the change goes into the queue and is synced later.
+      onSaved(await editItem(item, toItemEditInput(values), newPhoto, { onProgress: setProgress }));
     } catch (error) {
       setSubmitError(error instanceof ApiError ? error.message : UNKNOWN_ERROR);
     } finally {
@@ -64,7 +62,7 @@ export function ItemEditForm({ item, onSaved, onCancel }: ItemEditFormProps) {
     }
   }
 
-  const storedPhoto = item.photoKey === null ? null : itemPhotoUrl(item.photoKey);
+  const storedPhoto = useStoredImageUrl(item.photoKey, item.thumbnailKey).src;
 
   return (
     <Form {...form}>

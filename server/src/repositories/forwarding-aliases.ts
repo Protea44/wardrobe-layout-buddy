@@ -1,6 +1,7 @@
 import { randomInt } from "node:crypto";
 
-import { Prisma, type PrismaClient } from "../generated/prisma/client";
+import type { PrismaClient } from "../generated/prisma/client";
+import { isUniqueViolation } from "./errors";
 
 const ALPHABET = "abcdefghijkmnpqrstuvwxyz23456789";
 const ALIAS_LENGTH = 12;
@@ -8,10 +9,6 @@ const ALIAS_LENGTH = 12;
 // About 60 bits of randomness: aliases cannot be guessed.
 function randomAlias() {
   return Array.from({ length: ALIAS_LENGTH }, () => ALPHABET[randomInt(ALPHABET.length)]).join("");
-}
-
-function isUniqueViolation(error: unknown) {
-  return error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002";
 }
 
 // The local part of a user's receipt forwarding address.

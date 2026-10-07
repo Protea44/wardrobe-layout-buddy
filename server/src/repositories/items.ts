@@ -171,6 +171,13 @@ export function createItemRepository(prisma: PrismaClient) {
       return created.map(toResponse);
     },
 
+    // True if an item with this id exists and belongs to someone else. Only
+    // for client-chosen ids; such ids are then answered with 404.
+    async isIdTakenByOtherUser(userId: string, id: string): Promise<boolean> {
+      const count = await prisma.item.count({ where: { id, NOT: { userId } } });
+      return count > 0;
+    },
+
     async get(userId: string, id: string): Promise<ItemResponse | null> {
       const item = await prisma.item.findFirst({ where: { id, userId } });
       return item && toResponse(item);

@@ -2,9 +2,9 @@ import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-ro
 import { useState } from "react";
 import { AuthMessage } from "@/components/auth/auth-page";
 import { Button } from "@/components/ui/button";
-import { authErrorMessage } from "@/config/auth";
 import { pageHead } from "@/config/site";
 import { authClient } from "@/lib/auth-client";
+import { signOutCompletely } from "@/lib/offline/session";
 
 export const Route = createFileRoute("/profil")({
   head: () => pageHead("Mein Profil", "Dein persönliches Profil bei Kleiderschrank Kompakt."),
@@ -26,10 +26,10 @@ function ProfilePage() {
   async function signOut() {
     setError(null);
     setPending(true);
-    const result = await authClient.signOut();
+    const failure = await signOutCompletely();
     setPending(false);
-    if (result.error) {
-      setError(authErrorMessage(result.error));
+    if (failure !== null) {
+      setError(failure);
       return;
     }
     await navigate({ to: "/" });

@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { ApiError } from "@/lib/api";
+import { useOnline } from "@/lib/offline/online";
 
 type ConfirmDeleteDialogProps = {
   title: string;
@@ -31,6 +32,7 @@ export function ConfirmDeleteDialog({
   onConfirm,
   onDeleted,
 }: ConfirmDeleteDialogProps) {
+  const online = useOnline();
   const [open, setOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -58,9 +60,16 @@ export function ConfirmDeleteDialog({
       }}
     >
       <AlertDialogTrigger asChild>
-        <Button type="button" variant="outline" className="h-11 px-5">
+        <Button
+          type="button"
+          variant="outline"
+          className="h-11 px-5"
+          disabled={!online}
+          {...(!online && { title: "Löschen geht nur mit Internetverbindung." })}
+        >
           <Trash2 aria-hidden="true" />
           Löschen
+          {!online && <span className="sr-only"> (nur mit Internetverbindung)</span>}
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>

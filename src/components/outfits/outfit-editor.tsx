@@ -25,7 +25,9 @@ import {
 import { ApiError } from "@/lib/api";
 import { addItem, fromOutfit, type CanvasItem, type PickedItem } from "@/lib/outfit-canvas";
 import { outfitFormSchema, toOutfitSaveInput, type OutfitFormValues } from "@/lib/outfit-form";
-import { deleteOutfit, outfitQueryKeys, saveOutfit } from "@/lib/outfits-api";
+import { newClientId, storeOutfit } from "@/lib/offline/mutations";
+import { useOnline } from "@/lib/offline/online";
+import { deleteOutfit, outfitQueryKeys } from "@/lib/outfits-api";
 
 const UNKNOWN_ERROR = "Das Outfit konnte nicht gespeichert werden. Bitte versuche es erneut.";
 
@@ -37,7 +39,11 @@ export function OutfitEditor({ outfit }: { outfit: OutfitResponse | null }) {
     resolver: zodResolver(outfitFormSchema),
     defaultValues: { name: outfit?.name ?? "", occasion: outfit?.occasion ?? "" },
   });
+  // A new outfit gets its id now, so saving twice (or a retried sync) never
+  // creates two outfits.
+  const [outfitId] = useState(() => outfit?.id ?? newClientId());
   const [items, setItems] = useState<CanvasItem[]>(() => (outfit ? fromOutfit(outfit) : []));
+  const online = useOnline();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -61,7 +67,7 @@ export function OutfitEditor({ outfit }: { outfit: OutfitResponse | null }) {
   async function save(values: OutfitFormValues) {
     setError(null);
     try {
-      const saved = await saveOutfit(outfit?.id ?? null, toOutfitSaveInput(values, items));
+      const saved = await storeOutfit(outfitId, outfit, toOutfitSaveInput(values, items), items);
       queryClient.setQueryData(outfitQueryKeys.detail(saved.id), saved);
       await queryClient.invalidateQueries({ queryKey: outfitQueryKeys.all });
       toast.success("Gespeichert");

@@ -423,6 +423,11 @@
   .delete-account-actions { gap: 12px; }
   .account-deleted-notice { margin-block: 24px; padding: 14px 18px; background: var(--surface); border: 1px solid var(--gold); border-radius: var(--radius); font-size: 15px; font-weight: 500; }
 
+  .offline-banner { background: var(--navy); color: var(--white); border-bottom: 1px solid var(--gold); }
+  .offline-banner-inner { display: flex; align-items: center; gap: 10px; padding-block: 8px; font-size: 14px; line-height: 1.5; }
+  .offline-banner-inner svg { width: 16px; height: 16px; flex-shrink: 0; color: var(--gold); }
+  .offline-note { font-size: 14px; line-height: 1.5; color: var(--muted-foreground); }
+
   .item-saved { display: flex; flex-direction: column; align-items: center; gap: 24px; margin-top: 40px; padding: 32px 24px; text-align: center; border: 1px solid var(--border); border-radius: var(--radius); box-shadow: 0 1px 3px oklch(from var(--navy) l c h / 5%); }
   .item-saved-photo { width: 160px; height: 160px; object-fit: contain; border-radius: var(--radius); background: var(--surface); }
   .item-saved-title { font-size: 28px; line-height: 1.25; overflow-wrap: anywhere; }

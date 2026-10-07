@@ -21,7 +21,7 @@ import {
 } from "../lib/http-errors";
 import { parseJsonField, readMultipart, type MultipartBody } from "../lib/multipart";
 import { newRecordId, storageKey } from "../lib/storage-keys";
-import { RelatedRecordNotFoundError } from "../repositories/errors";
+import { isUniqueViolation, RelatedRecordNotFoundError } from "../repositories/errors";
 import { InvalidCursorError } from "../repositories/item-search";
 
 const itemParamsSchema = z.object({ id: idSchema });
@@ -104,7 +104,17 @@ export const itemsRoutes: FastifyPluginAsync<ItemsOptions> = async (app, { confi
       return sendUnsupportedMediaType(reply, "Only WebP, JPEG and PNG are allowed");
     }
 
-    const id = newRecordId();
+    // A retry of a create that already worked returns the stored item.
+    const clientId = fields.data.id;
+    if (clientId !== undefined) {
+      const existing = await app.repositories.items.get(userId, clientId);
+      if (existing !== null) return existing;
+      if (await app.repositories.items.isIdTakenByOtherUser(userId, clientId)) {
+        return sendNotFound(reply);
+      }
+    }
+
+    const id = clientId ?? newRecordId();
     const photoKey = storageKey(userId, id, `photo.${pair.photo.type.extension}`);
     const thumbnailKey = storageKey(userId, id, `thumbnail.${pair.thumbnail.type.extension}`);
 
@@ -126,6 +136,11 @@ export const itemsRoutes: FastifyPluginAsync<ItemsOptions> = async (app, { confi
       if (item === null) throw new Error("Item vanished right after it was created");
       return await reply.code(201).send(item);
     } catch (error) {
+      // A parallel retry with the same id won: its item and files stay.
+      if (clientId !== undefined && isUniqueViolation(error)) {
+        const existing = await app.repositories.items.get(userId, clientId);
+        return existing ?? sendNotFound(reply);
+      }
       // Leave neither orphaned files nor an item without its photo behind.
       await Promise.allSettled([
         app.storage.deletePrefix(bucket, `${userId}/${id}/`),

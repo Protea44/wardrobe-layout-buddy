@@ -1,21 +1,19 @@
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute, Link, redirect } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { Plus } from "lucide-react";
 
 import { OutfitPreview } from "@/components/outfits/outfit-preview";
 import { Button } from "@/components/ui/button";
 import { pageHead } from "@/config/site";
 import { ApiError } from "@/lib/api";
-import { authClient } from "@/lib/auth-client";
-import { fetchOutfits, outfitQueryKeys } from "@/lib/outfits-api";
+import { loadOutfits } from "@/lib/offline/data";
+import { outfitQueryKeys } from "@/lib/outfits-api";
+import { requireSession } from "@/lib/offline/session";
 
 export const Route = createFileRoute("/profil_/outfits/")({
   head: () => pageHead("Meine Outfits", "Deine gespeicherten Outfits aus deinem Kleiderschrank."),
-  // Private page: without a session the visitor is sent to the login.
-  beforeLoad: async () => {
-    const { data } = await authClient.getSession();
-    if (!data) throw redirect({ to: "/login" });
-  },
+  // Private page; offline it shows the offline copy.
+  beforeLoad: requireSession,
   component: OutfitsPage,
 });
 
@@ -31,7 +29,7 @@ function NewOutfitButton() {
 }
 
 function OutfitsPage() {
-  const outfits = useQuery({ queryKey: outfitQueryKeys.all, queryFn: fetchOutfits });
+  const outfits = useQuery({ queryKey: outfitQueryKeys.all, queryFn: loadOutfits });
 
   return (
     <div className="site-container page-body wardrobe-page">

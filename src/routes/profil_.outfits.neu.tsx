@@ -1,16 +1,13 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 
 import { OutfitEditor } from "@/components/outfits/outfit-editor";
 import { pageHead } from "@/config/site";
-import { authClient } from "@/lib/auth-client";
+import { requireSession } from "@/lib/offline/session";
 
 export const Route = createFileRoute("/profil_/outfits/neu")({
   head: () => pageHead("Neues Outfit", "Stell ein neues Outfit aus deinem Schrank zusammen."),
-  // Private page: without a session the visitor is sent to the login.
-  beforeLoad: async () => {
-    const { data } = await authClient.getSession();
-    if (!data) throw redirect({ to: "/login" });
-  },
+  // Private page; offline it shows the offline copy.
+  beforeLoad: requireSession,
   component: NewOutfitPage,
 });
 

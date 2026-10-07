@@ -1,26 +1,24 @@
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute, Link, redirect } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 
 import { OutfitEditor } from "@/components/outfits/outfit-editor";
 import { pageHead } from "@/config/site";
 import { ApiError } from "@/lib/api";
-import { authClient } from "@/lib/auth-client";
-import { fetchOutfit, outfitQueryKeys } from "@/lib/outfits-api";
+import { loadOutfit } from "@/lib/offline/data";
+import { outfitQueryKeys } from "@/lib/outfits-api";
+import { requireSession } from "@/lib/offline/session";
 
 export const Route = createFileRoute("/profil_/outfits/$id")({
   head: () => pageHead("Outfit bearbeiten", "Ein Outfit aus deinem Kleiderschrank."),
-  // Private page: without a session the visitor is sent to the login.
-  beforeLoad: async () => {
-    const { data } = await authClient.getSession();
-    if (!data) throw redirect({ to: "/login" });
-  },
+  // Private page; offline it shows the offline copy.
+  beforeLoad: requireSession,
   component: OutfitPage,
 });
 
 function OutfitPage() {
   const { id } = Route.useParams();
-  const outfit = useQuery({ queryKey: outfitQueryKeys.detail(id), queryFn: () => fetchOutfit(id) });
+  const outfit = useQuery({ queryKey: outfitQueryKeys.detail(id), queryFn: () => loadOutfit(id) });
   const notFound = outfit.error instanceof ApiError && outfit.error.status === 404;
 
   return (

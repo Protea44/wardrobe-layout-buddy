@@ -15,6 +15,7 @@ import { Form } from "@/components/ui/form";
 import { authErrorMessage } from "@/config/auth";
 import { accountQueryKey } from "@/lib/account-api";
 import { authClient } from "@/lib/auth-client";
+import { signOutCompletely } from "@/lib/offline/session";
 
 export function ProfileSection({ account }: { account: AccountResponse }) {
   const navigate = useNavigate();
@@ -41,10 +42,10 @@ export function ProfileSection({ account }: { account: AccountResponse }) {
   async function signOut() {
     setError(null);
     setSigningOut(true);
-    const result = await authClient.signOut();
+    const failure = await signOutCompletely();
     setSigningOut(false);
-    if (result.error) {
-      setError(authErrorMessage(result.error));
+    if (failure !== null) {
+      setError(failure);
       return;
     }
     queryClient.clear();

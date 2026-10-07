@@ -4,8 +4,10 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ApiError } from "@/lib/api";
 import { downloadExport } from "@/lib/account-api";
+import { useOnline } from "@/lib/offline/online";
 
 export function ExportSection() {
+  const online = useOnline();
   const [exporting, setExporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -37,6 +39,7 @@ export function ExportSection() {
       <p className="sr-only" role="status">
         {exporting ? "Dein Export wird erstellt." : ""}
       </p>
+      {!online && <p className="offline-note">Der Export braucht eine Internetverbindung.</p>}
       {error !== null && (
         <p className="form-error" role="alert">
           {error}
@@ -45,7 +48,7 @@ export function ExportSection() {
       <Button
         type="button"
         className="h-11 justify-self-start px-6"
-        disabled={exporting}
+        disabled={exporting || !online}
         onClick={() => void exportAll()}
       >
         <Download aria-hidden="true" />

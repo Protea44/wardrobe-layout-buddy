@@ -1,6 +1,13 @@
 import { z } from "zod";
 
-import { clearable, dateOnlySchema, idSchema, text, timestampSchema } from "./common";
+import {
+  clearable,
+  clientIdSchema,
+  dateOnlySchema,
+  idSchema,
+  text,
+  timestampSchema,
+} from "./common";
 
 export const seasonSchema = z.enum(["fruehling", "sommer", "herbst", "winter", "ganzjaehrig"]);
 export const visibilitySchema = z.enum(["PRIVATE", "LINK", "PUBLIC"]);
@@ -84,9 +91,11 @@ export const itemColorSchema = z.enum(itemColors);
 export const ITEM_PHOTO_MAX_BYTES = 10 * 1024 * 1024;
 
 // The "data" part (JSON) of POST /api/items, sent next to the "photo" and
-// "thumbnail" files. Category and color must come from the lists above.
+// "thumbnail" files. Category and color must come from the lists above. With
+// an id, the request is idempotent: a second POST returns the first item.
 export const itemUploadSchema = itemCreateSchema
   .extend({
+    id: clientIdSchema.optional(),
     category: itemCategorySchema,
     color: clearable(itemColorSchema),
   })

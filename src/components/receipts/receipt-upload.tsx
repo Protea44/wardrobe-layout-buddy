@@ -8,6 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import { RECEIPT_FILE_ACCEPT } from "@/config/receipts";
 import { ApiError } from "@/lib/api";
 import { ImagePipelineError, prepareReceiptFile } from "@/lib/imagePipeline";
+import { useOnline } from "@/lib/offline/online";
 import { uploadReceipt } from "@/lib/receipts-api";
 
 const TOO_LARGE = "Der Beleg ist zu groß. Erlaubt sind höchstens 10 MB.";
@@ -26,6 +27,7 @@ export function ReceiptUpload({ onUploaded }: ReceiptUploadProps) {
   const [progress, setProgress] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const online = useOnline();
   const busy = preparing || progress !== null;
   const percent = Math.round((progress ?? 0) * 100);
 
@@ -57,7 +59,7 @@ export function ReceiptUpload({ onUploaded }: ReceiptUploadProps) {
     event.preventDefault();
     setDragging(false);
     const file = event.dataTransfer.files[0];
-    if (file && !busy) void upload(file);
+    if (file && !busy && online) void upload(file);
   }
 
   return (
@@ -87,11 +89,14 @@ export function ReceiptUpload({ onUploaded }: ReceiptUploadProps) {
           <Button
             type="button"
             className="h-12 px-6 text-base"
-            disabled={busy}
+            disabled={busy || !online}
             onClick={() => input.current?.click()}
           >
             Beleg auswählen
           </Button>
+          {!online && (
+            <p className="offline-note">Belege kannst du nur mit Internetverbindung hochladen.</p>
+          )}
         </div>
       </div>
 

@@ -10,6 +10,8 @@ import {
 
 import { ConsentManager } from "@/components/consent/consent-manager";
 import { Header } from "@/components/layout/header";
+import { OfflineBanner } from "@/components/offline/offline-banner";
+import { OfflineSync } from "@/components/offline/offline-sync";
 import { Footer } from "@/components/layout/footer";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
@@ -74,12 +76,14 @@ function RootComponent() {
           Zum Inhalt springen
         </a>
         <Header />
+        <OfflineBanner />
         <main id="main-content" className="site-main" tabIndex={-1}>
           <Outlet />
         </main>
         <Footer />
         <ConsentManager />
         <Toaster position="top-center" />
+        <OfflineSync />
       </div>
     </QueryClientProvider>
   );

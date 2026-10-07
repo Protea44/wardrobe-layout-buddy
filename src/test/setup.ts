@@ -1,4 +1,6 @@
 import "@testing-library/jest-dom/vitest";
+// An in-memory IndexedDB for the offline cache (Dexie).
+import "fake-indexeddb/auto";
 
 Object.defineProperty(window, "scrollTo", {
   writable: true,

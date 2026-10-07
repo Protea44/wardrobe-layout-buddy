@@ -1,4 +1,4 @@
-import { itemPhotoUrl } from "@/lib/items-api";
+import { StoredImage } from "@/components/stored-image";
 
 // The thumbnail, or the name when the item has no photo.
 export function OutfitItemImage({
@@ -9,7 +9,7 @@ export function OutfitItemImage({
   thumbnailKey: string | null;
 }) {
   return thumbnailKey !== null ? (
-    <img src={itemPhotoUrl(thumbnailKey)} alt="" draggable={false} loading="lazy" />
+    <StoredImage storageKey={thumbnailKey} alt="" draggable={false} loading="lazy" />
   ) : (
     <span className="outfit-item-fallback">{name}</span>
   );

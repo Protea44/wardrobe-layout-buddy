@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { clearable, idSchema, text, timestampSchema } from "./common";
+import { clearable, clientIdSchema, idSchema, text, timestampSchema } from "./common";
 
 // Position on the outfit canvas, relative to its width and height.
 const relativeSchema = z.number().min(0).max(1);
@@ -45,6 +45,10 @@ export const outfitSaveSchema = z
   })
   .strict();
 
+// Body of POST /api/outfits. With an id, a retried POST returns the outfit
+// created first instead of a duplicate.
+export const outfitCreateBodySchema = outfitSaveSchema.extend({ id: clientIdSchema.optional() });
+
 export const outfitResponseSchema = z.object({
   id: idSchema,
   name: z.string(),
@@ -70,4 +74,5 @@ export type OutfitItemInput = z.infer<typeof outfitItemSchema>;
 export type OutfitCreateInput = z.infer<typeof outfitCreateSchema>;
 export type OutfitUpdateInput = z.infer<typeof outfitUpdateSchema>;
 export type OutfitSaveInput = z.infer<typeof outfitSaveSchema>;
+export type OutfitCreateBody = z.infer<typeof outfitCreateBodySchema>;
 export type OutfitResponse = z.infer<typeof outfitResponseSchema>;

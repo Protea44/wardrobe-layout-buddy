@@ -15,10 +15,15 @@ export function fetchOutfit(id: string) {
   return api(`/outfits/${encodeURIComponent(id)}`, { schema: outfitResponseSchema });
 }
 
-// Creates the outfit, or replaces it entirely when an id is given.
-export function saveOutfit(id: string | null, input: OutfitSaveInput) {
+// Creates the outfit (under the client's id, so a retry cannot duplicate it),
+// or replaces it entirely when an id is given.
+export function saveOutfit(id: string | null, input: OutfitSaveInput, clientId?: string) {
   return id === null
-    ? api("/outfits", { method: "POST", body: input, schema: outfitResponseSchema })
+    ? api("/outfits", {
+        method: "POST",
+        body: { ...input, ...(clientId !== undefined && { id: clientId }) },
+        schema: outfitResponseSchema,
+      })
     : api(`/outfits/${encodeURIComponent(id)}`, {
         method: "PUT",
         body: input,

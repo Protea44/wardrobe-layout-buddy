@@ -60,7 +60,18 @@ export function createOutfitRepository(prisma: PrismaClient) {
 
   return {
     // Creates the outfit with all its placements in one transaction.
-    async createWithItems(userId: string, input: OutfitSaveInput): Promise<OutfitResponse> {
+    // True if an outfit with this id exists and belongs to someone else.
+    async isIdTakenByOtherUser(userId: string, id: string): Promise<boolean> {
+      const count = await prisma.outfit.count({ where: { id, NOT: { userId } } });
+      return count > 0;
+    },
+
+    // With an id chosen by the client, so retries cannot duplicate the outfit.
+    async createWithItems(
+      userId: string,
+      input: OutfitSaveInput,
+      id?: string,
+    ): Promise<OutfitResponse> {
       return prisma.$transaction(async (tx) => {
         await assertOwnItems(
           tx,
@@ -68,7 +79,12 @@ export function createOutfitRepository(prisma: PrismaClient) {
           input.items.map(({ itemId }) => itemId),
         );
         const outfit = await tx.outfit.create({
-          data: { name: input.name, userId, occasion: input.occasion ?? null },
+          data: {
+            name: input.name,
+            userId,
+            occasion: input.occasion ?? null,
+            ...(id !== undefined && { id }),
+          },
         });
         await tx.outfitItem.createMany({ data: placements(outfit.id, input) });
         const created = await tx.outfit.findUniqueOrThrow({

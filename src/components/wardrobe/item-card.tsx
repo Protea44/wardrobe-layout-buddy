@@ -3,7 +3,7 @@ import { Lock, Shirt } from "lucide-react";
 
 import type { ItemResponse } from "@shared/item";
 
-import { itemPhotoUrl } from "@/lib/items-api";
+import { StoredImage } from "@/components/stored-image";
 import type { WardrobeSearch } from "@/lib/wardrobe-search";
 
 // `search` holds the wardrobe's filters; the item page links back with them.
@@ -14,7 +14,7 @@ export function ItemCard({ item, search }: { item: ItemResponse; search: Wardrob
         <div className="item-card-photo">
           {item.thumbnailKey !== null ? (
             // The name below already describes the photo.
-            <img src={itemPhotoUrl(item.thumbnailKey)} alt="" loading="lazy" decoding="async" />
+            <StoredImage storageKey={item.thumbnailKey} alt="" loading="lazy" decoding="async" />
           ) : (
             <Shirt aria-hidden="true" className="item-card-placeholder" />
           )}
