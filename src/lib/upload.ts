@@ -13,17 +13,19 @@ export type UploadOptions = {
   onProgress?: (fraction: number) => void;
 };
 
-// POSTs multipart/form-data and validates the JSON answer. Uses XMLHttpRequest
+type SendOptions = UploadOptions & { method?: "POST" | "PUT" };
+
+// Sends multipart/form-data (POST unless stated) and validates the JSON answer. Uses XMLHttpRequest
 // because fetch cannot report upload progress. Errors are ApiErrors in German.
 export function postMultipart<T>(
   path: string,
   form: FormData,
   schema: ZodType<T>,
-  { onProgress }: UploadOptions = {},
+  { onProgress, method = "POST" }: SendOptions = {},
 ): Promise<T> {
   return new Promise((resolve, reject) => {
     const request = new XMLHttpRequest();
-    request.open("POST", `${API_BASE}${path}`);
+    request.open(method, `${API_BASE}${path}`);
     request.withCredentials = true;
     request.setRequestHeader("Accept", "application/json");
 

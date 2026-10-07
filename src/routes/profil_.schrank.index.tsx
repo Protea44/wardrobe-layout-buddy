@@ -118,6 +118,7 @@ function WardrobePage() {
           ) : (
             <WardrobeGrid
               items={items}
+              search={search}
               hasMore={hasNextPage}
               loadingMore={isFetchingNextPage}
               onLoadMore={loadMore}

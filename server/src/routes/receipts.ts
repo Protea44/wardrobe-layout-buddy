@@ -57,6 +57,14 @@ export const receiptsRoutes: FastifyPluginAsync<ReceiptsOptions> = async (app, {
     return app.repositories.receipts.listSummaries(request.userId);
   });
 
+  app.get("/receipts/:id", async (request, reply) => {
+    if (request.userId === null) return sendUnauthorized(reply);
+    const params = receiptParamsSchema.safeParse(request.params);
+    if (!params.success) return sendNotFound(reply);
+    const receipt = await app.repositories.receipts.get(request.userId, params.data.id);
+    return receipt ?? sendNotFound(reply);
+  });
+
   // multipart/form-data with one file "file": PDF, JPEG or PNG up to 10 MB.
   app.post("/receipts", async (request, reply) => {
     if (request.userId === null) return sendUnauthorized(reply);

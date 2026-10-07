@@ -4,9 +4,11 @@ import type { ItemResponse } from "@shared/item";
 
 import { ItemCard } from "@/components/wardrobe/item-card";
 import { Button } from "@/components/ui/button";
+import type { WardrobeSearch } from "@/lib/wardrobe-search";
 
 type WardrobeGridProps = {
   items: ItemResponse[];
+  search: WardrobeSearch;
   hasMore: boolean;
   loadingMore: boolean;
   onLoadMore: () => void;
@@ -14,7 +16,13 @@ type WardrobeGridProps = {
 
 // Loads the next page once the end of the grid comes near. The button stays as
 // a fallback for keyboards, screen readers and browsers without observers.
-export function WardrobeGrid({ items, hasMore, loadingMore, onLoadMore }: WardrobeGridProps) {
+export function WardrobeGrid({
+  items,
+  search,
+  hasMore,
+  loadingMore,
+  onLoadMore,
+}: WardrobeGridProps) {
   const sentinel = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -34,7 +42,7 @@ export function WardrobeGrid({ items, hasMore, loadingMore, onLoadMore }: Wardro
     <>
       <ul className="wardrobe-grid">
         {items.map((item) => (
-          <ItemCard key={item.id} item={item} />
+          <ItemCard key={item.id} item={item} search={search} />
         ))}
       </ul>
       {hasMore && (

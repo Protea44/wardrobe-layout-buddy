@@ -2,6 +2,7 @@ import {
   itemFacetsSchema,
   itemListResponseSchema,
   itemResponseSchema,
+  type ItemEditInput,
   type ItemResponse,
   type ItemUploadInput,
 } from "@shared/item";
@@ -44,4 +45,31 @@ export function fetchItemFacets() {
 
 export function fetchItem(id: string) {
   return api(`/items/${encodeURIComponent(id)}`, { schema: itemResponseSchema });
+}
+
+export function updateItem(id: string, input: ItemEditInput) {
+  return api(`/items/${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    body: input,
+    schema: itemResponseSchema,
+  });
+}
+
+export async function deleteItem(id: string) {
+  await api(`/items/${encodeURIComponent(id)}`, { method: "DELETE" });
+}
+
+// PUT /api/items/:id/photo with a new photo and thumbnail.
+export function replaceItemPhoto(
+  id: string,
+  input: { photo: Blob; thumbnail: Blob },
+  options: UploadOptions = {},
+): Promise<ItemResponse> {
+  const form = new FormData();
+  form.append("photo", input.photo, photoFilename("photo", input.photo));
+  form.append("thumbnail", input.thumbnail, photoFilename("thumbnail", input.thumbnail));
+  return postMultipart(`/items/${encodeURIComponent(id)}/photo`, form, itemResponseSchema, {
+    ...options,
+    method: "PUT",
+  });
 }

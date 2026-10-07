@@ -1,24 +1,48 @@
 import multipart from "@fastify/multipart";
 import type { FastifyPluginAsync } from "fastify";
+import { randomUUID } from "node:crypto";
 import { z } from "zod";
 
 import { idSchema } from "@shared/common";
-import { ITEM_PHOTO_MAX_BYTES, itemListQuerySchema, itemUploadSchema } from "@shared/item";
+import {
+  ITEM_PHOTO_MAX_BYTES,
+  itemEditSchema,
+  itemListQuerySchema,
+  itemUploadSchema,
+} from "@shared/item";
 
 import type { AppConfig } from "../config";
-import { detectImageType } from "../lib/file-type";
+import { detectImageType, type FileType } from "../lib/file-type";
 import {
   sendBadRequest,
   sendNotFound,
   sendUnauthorized,
   sendUnsupportedMediaType,
 } from "../lib/http-errors";
-import { parseJsonField, readMultipart } from "../lib/multipart";
+import { parseJsonField, readMultipart, type MultipartBody } from "../lib/multipart";
 import { newRecordId, storageKey } from "../lib/storage-keys";
 import { RelatedRecordNotFoundError } from "../repositories/errors";
 import { InvalidCursorError } from "../repositories/item-search";
 
 const itemParamsSchema = z.object({ id: idSchema });
+
+type PhotoFile = { content: Buffer; type: FileType };
+type PhotoPair = { photo: PhotoFile; thumbnail: PhotoFile };
+
+// The files "photo" and "thumbnail" of a multipart body: "missing" if one is
+// absent, "type" if one is not really WebP, JPEG or PNG.
+function photoPair(body: MultipartBody): PhotoPair | "missing" | "type" {
+  const photo = body.files.get("photo");
+  const thumbnail = body.files.get("thumbnail");
+  if (body.invalid || body.files.size !== 2 || !photo || !thumbnail) return "missing";
+  const photoType = detectImageType(photo);
+  const thumbnailType = detectImageType(thumbnail);
+  if (photoType === null || thumbnailType === null) return "type";
+  return {
+    photo: { content: photo, type: photoType },
+    thumbnail: { content: thumbnail, type: thumbnailType },
+  };
+}
 
 type ItemsOptions = {
   config: Pick<AppConfig, "S3_BUCKET_ITEM_PHOTOS">;
@@ -69,29 +93,34 @@ export const itemsRoutes: FastifyPluginAsync<ItemsOptions> = async (app, { confi
     }
 
     const body = await readMultipart(request);
-    const photo = body.files.get("photo");
-    const thumbnail = body.files.get("thumbnail");
     const data = body.fields.get("data");
-    const expectedParts = body.files.size === 2 && body.fields.size === 1;
-    if (body.invalid || !expectedParts || !photo || !thumbnail || data === undefined) {
+    const pair = photoPair(body);
+    if (pair === "missing" || body.fields.size !== 1 || data === undefined) {
       return sendBadRequest(reply, "Expected the files photo and thumbnail and the field data");
     }
     const fields = itemUploadSchema.safeParse(parseJsonField(data));
     if (!fields.success) return sendBadRequest(reply, "Invalid item fields");
-
-    const photoType = detectImageType(photo);
-    const thumbnailType = detectImageType(thumbnail);
-    if (photoType === null || thumbnailType === null) {
+    if (pair === "type") {
       return sendUnsupportedMediaType(reply, "Only WebP, JPEG and PNG are allowed");
     }
 
     const id = newRecordId();
-    const photoKey = storageKey(userId, id, `photo.${photoType.extension}`);
-    const thumbnailKey = storageKey(userId, id, `thumbnail.${thumbnailType.extension}`);
+    const photoKey = storageKey(userId, id, `photo.${pair.photo.type.extension}`);
+    const thumbnailKey = storageKey(userId, id, `thumbnail.${pair.thumbnail.type.extension}`);
 
     try {
-      await app.storage.putObject(bucket, photoKey, photo, photoType.contentType);
-      await app.storage.putObject(bucket, thumbnailKey, thumbnail, thumbnailType.contentType);
+      await app.storage.putObject(
+        bucket,
+        photoKey,
+        pair.photo.content,
+        pair.photo.type.contentType,
+      );
+      await app.storage.putObject(
+        bucket,
+        thumbnailKey,
+        pair.thumbnail.content,
+        pair.thumbnail.type.contentType,
+      );
       await app.repositories.items.create(userId, fields.data, id);
       const item = await app.repositories.items.setPhoto(userId, id, { photoKey, thumbnailKey });
       if (item === null) throw new Error("Item vanished right after it was created");
@@ -105,5 +134,110 @@ export const itemsRoutes: FastifyPluginAsync<ItemsOptions> = async (app, { confi
       if (error instanceof RelatedRecordNotFoundError) return sendNotFound(reply);
       throw error;
     }
+  });
+
+  // JSON body (itemEditSchema): only the fields sent change, null clears one.
+  app.patch("/items/:id", async (request, reply) => {
+    if (request.userId === null) return sendUnauthorized(reply);
+    const params = itemParamsSchema.safeParse(request.params);
+    if (!params.success) return sendNotFound(reply);
+    const input = itemEditSchema.safeParse(request.body);
+    if (!input.success) return sendBadRequest(reply, "Invalid item fields");
+
+    try {
+      const item = await app.repositories.items.update(request.userId, params.data.id, input.data);
+      return item ?? sendNotFound(reply);
+    } catch (error) {
+      if (error instanceof RelatedRecordNotFoundError) return sendNotFound(reply);
+      throw error;
+    }
+  });
+
+  // Removes the item, its outfit links (by cascade) and its files.
+  app.delete("/items/:id", async (request, reply) => {
+    if (request.userId === null) return sendUnauthorized(reply);
+    const userId = request.userId;
+    const params = itemParamsSchema.safeParse(request.params);
+    if (!params.success) return sendNotFound(reply);
+
+    if (!(await app.repositories.items.delete(userId, params.data.id))) return sendNotFound(reply);
+    try {
+      await app.storage.deletePrefix(bucket, `${userId}/${params.data.id}/`);
+    } catch {
+      // The item is gone either way; leftover files are only reachable by their owner.
+      request.log.error("Deleting the files of a removed item failed");
+    }
+    return reply.code(204).send();
+  });
+
+  // multipart/form-data with the files "photo" and "thumbnail". New file names
+  // on every replacement, so no cached copy of the old photo is ever shown.
+  app.put("/items/:id/photo", async (request, reply) => {
+    if (request.userId === null) return sendUnauthorized(reply);
+    const userId = request.userId;
+    const params = itemParamsSchema.safeParse(request.params);
+    if (!params.success) return sendNotFound(reply);
+    if (!request.isMultipart()) {
+      return sendUnsupportedMediaType(reply, "Expected multipart/form-data");
+    }
+
+    const body = await readMultipart(request);
+    const pair = photoPair(body);
+    if (pair === "missing" || body.fields.size !== 0) {
+      return sendBadRequest(reply, "Expected the files photo and thumbnail");
+    }
+    if (pair === "type") {
+      return sendUnsupportedMediaType(reply, "Only WebP, JPEG and PNG are allowed");
+    }
+
+    const id = params.data.id;
+    const existing = await app.repositories.items.get(userId, id);
+    if (existing === null) return sendNotFound(reply);
+
+    const version = randomUUID().slice(0, 8);
+    const photoKey = storageKey(userId, id, `photo-${version}.${pair.photo.type.extension}`);
+    const thumbnailKey = storageKey(
+      userId,
+      id,
+      `thumbnail-${version}.${pair.thumbnail.type.extension}`,
+    );
+    let item;
+    try {
+      await app.storage.putObject(
+        bucket,
+        photoKey,
+        pair.photo.content,
+        pair.photo.type.contentType,
+      );
+      await app.storage.putObject(
+        bucket,
+        thumbnailKey,
+        pair.thumbnail.content,
+        pair.thumbnail.type.contentType,
+      );
+      item = await app.repositories.items.setPhoto(userId, id, { photoKey, thumbnailKey });
+    } catch (error) {
+      await Promise.allSettled([
+        app.storage.deleteObject(bucket, photoKey),
+        app.storage.deleteObject(bucket, thumbnailKey),
+      ]);
+      throw error;
+    }
+    // Deleted between the check and the update.
+    if (item === null) {
+      await app.storage.deletePrefix(bucket, `${userId}/${id}/`).catch(() => {});
+      return sendNotFound(reply);
+    }
+
+    const oldKeys = [existing.photoKey, existing.thumbnailKey].filter(
+      (key): key is string => key !== null,
+    );
+    const removed = await Promise.allSettled(
+      oldKeys.map((key) => app.storage.deleteObject(bucket, key)),
+    );
+    if (removed.some((result) => result.status === "rejected")) {
+      request.log.error("Deleting a replaced item photo failed");
+    }
+    return item;
   });
 };

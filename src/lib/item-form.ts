@@ -1,3 +1,4 @@
+import type { FieldErrors } from "react-hook-form";
 import { z } from "zod";
 
 import { dateOnlySchema } from "@shared/common";
@@ -6,7 +7,10 @@ import {
   itemColorSchema,
   seasonSchema,
   type ItemCategory,
+  itemColors,
   type ItemColor,
+  type ItemEditInput,
+  type ItemResponse,
   type ItemUploadInput,
 } from "@shared/item";
 
@@ -95,4 +99,57 @@ export function toItemUploadInput(values: ItemFormValues): ItemUploadInput {
     ...(values.seasons.length > 0 && { seasons: values.seasons }),
     ...(values.notes !== "" && { notes: values.notes }),
   };
+}
+
+// The edit form, filled from a stored item. Prices show with a comma.
+export function itemToFormInput(item: ItemResponse): ItemFormInput {
+  const color = (itemColors as readonly string[]).includes(item.color ?? "")
+    ? (item.color as ItemColor)
+    : "";
+  return {
+    category: item.category,
+    color,
+    name: item.name,
+    brand: item.brand ?? "",
+    size: item.size ?? "",
+    price: item.price?.replace(".", ",") ?? "",
+    purchaseDate: item.purchaseDate ?? "",
+    material: item.material ?? "",
+    retailer: item.retailer ?? "",
+    seasons: item.seasons,
+    notes: item.notes ?? "",
+  };
+}
+
+// Every field of the form; emptied fields are cleared (null).
+export function toItemEditInput(values: ItemFormValues): ItemEditInput {
+  const orNull = (value: string) => (value === "" ? null : value);
+  return {
+    name: values.name || defaultItemName(values.color, values.category),
+    category: values.category,
+    color: values.color === "" ? null : values.color,
+    brand: orNull(values.brand),
+    size: orNull(values.size),
+    price: values.price === "" ? null : normalizePrice(values.price),
+    purchaseDate: orNull(values.purchaseDate),
+    material: orNull(values.material),
+    retailer: orNull(values.retailer),
+    seasons: values.seasons,
+    notes: orNull(values.notes),
+  };
+}
+
+// Fields inside "Weitere Angaben"; the section opens when one of them is invalid.
+const DETAIL_FIELDS = [
+  "brand",
+  "size",
+  "price",
+  "purchaseDate",
+  "material",
+  "retailer",
+  "notes",
+] as const;
+
+export function hasDetailErrors(errors: FieldErrors<ItemFormInput>) {
+  return DETAIL_FIELDS.some((field) => errors[field] !== undefined);
 }

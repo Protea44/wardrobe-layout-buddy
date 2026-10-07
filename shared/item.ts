@@ -171,6 +171,16 @@ export const itemFacetsSchema = z.object({
   seasons: z.array(seasonSchema),
 });
 
+// Body of PATCH /api/items/:id from the edit form. Like the upload, category
+// and color come from the fixed lists; null clears a field.
+export const itemEditSchema = itemUpdateSchema
+  .omit({ lifecycleStatus: true })
+  .extend({
+    category: itemCategorySchema.optional(),
+    color: clearable(itemColorSchema),
+  })
+  .strict();
+
 export type Season = z.infer<typeof seasonSchema>;
 export type Visibility = z.infer<typeof visibilitySchema>;
 export type LifecycleStatus = z.infer<typeof lifecycleStatusSchema>;
@@ -180,6 +190,7 @@ export type ItemUploadInput = z.infer<typeof itemUploadSchema>;
 export type ItemCreateInput = z.infer<typeof itemCreateSchema>;
 export type ItemUpdateInput = z.infer<typeof itemUpdateSchema>;
 export type ItemResponse = z.infer<typeof itemResponseSchema>;
+export type ItemEditInput = z.infer<typeof itemEditSchema>;
 export type ItemSort = z.infer<typeof itemSortSchema>;
 export type ItemListQuery = z.infer<typeof itemListQuerySchema>;
 export type ItemListResponse = z.infer<typeof itemListResponseSchema>;

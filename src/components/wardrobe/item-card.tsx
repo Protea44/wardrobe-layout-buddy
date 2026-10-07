@@ -4,11 +4,13 @@ import { Lock, Shirt } from "lucide-react";
 import type { ItemResponse } from "@shared/item";
 
 import { itemPhotoUrl } from "@/lib/items-api";
+import type { WardrobeSearch } from "@/lib/wardrobe-search";
 
-export function ItemCard({ item }: { item: ItemResponse }) {
+// `search` holds the wardrobe's filters; the item page links back with them.
+export function ItemCard({ item, search }: { item: ItemResponse; search: WardrobeSearch }) {
   return (
     <li>
-      <Link to="/profil/schrank/$id" params={{ id: item.id }} className="item-card">
+      <Link to="/profil/schrank/$id" params={{ id: item.id }} search={search} className="item-card">
         <div className="item-card-photo">
           {item.thumbnailKey !== null ? (
             // The name below already describes the photo.

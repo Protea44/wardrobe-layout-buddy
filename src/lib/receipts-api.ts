@@ -13,6 +13,7 @@ import { photoFilename, postMultipart, type UploadOptions } from "@/lib/upload";
 
 export const receiptQueryKeys = {
   list: ["receipts"] as const,
+  detail: (id: string) => ["receipts", "detail", id] as const,
   forwardingAlias: ["receipts", "forwarding-alias"] as const,
 };
 
@@ -26,6 +27,10 @@ export async function fetchForwardingAlias() {
     schema: forwardingAliasResponseSchema,
   });
   return forwardingAlias;
+}
+
+export function fetchReceipt(id: string) {
+  return api(`/receipts/${encodeURIComponent(id)}`, { schema: receiptResponseSchema });
 }
 
 export function fetchReceipts() {
