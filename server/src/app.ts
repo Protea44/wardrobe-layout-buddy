@@ -1,4 +1,4 @@
-import Fastify from "fastify";
+import Fastify, { type RouteOptions } from "fastify";
 
 import type { AppConfig } from "./config";
 import { loadFrontend } from "./lib/frontend";
@@ -25,14 +25,18 @@ export type BuildAppOptions = {
   storage?: Storage;
   mailer?: Mailer;
   logStream?: NodeJS.WritableStream;
+  // Sees every route as it is registered, e.g. to check them all in a test.
+  onRoute?: (route: RouteOptions) => void;
 };
 
-export async function buildApp({ config, storage, mailer, logStream }: BuildAppOptions) {
+export async function buildApp({ config, storage, mailer, logStream, onRoute }: BuildAppOptions) {
   const app = Fastify({
     logger: loggerOptions(config, logStream),
     bodyLimit: config.BODY_LIMIT_BYTES,
     trustProxy: config.TRUST_PROXY,
   });
+
+  if (onRoute) app.addHook("onRoute", onRoute);
 
   const frontend = config.NODE_ENV === "production" ? loadFrontend(config.FRONTEND_DIR) : null;
 

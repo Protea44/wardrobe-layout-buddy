@@ -10,7 +10,18 @@ import { outfitQueryKeys } from "@/lib/outfits-api";
 import { requireSession } from "@/lib/offline/session";
 
 export const Route = createFileRoute("/profil_/outfits/$id")({
-  head: () => pageHead("Outfit bearbeiten", "Ein Outfit aus deinem Kleiderschrank."),
+  // Loads the outfit for the title; the page's query then finds it in the cache.
+  loader: ({ context, params }) =>
+    context.queryClient
+      .ensureQueryData({
+        queryKey: outfitQueryKeys.detail(params.id),
+        queryFn: () => loadOutfit(params.id),
+      })
+      .catch(() => null),
+  head: ({ loaderData }) =>
+    loaderData
+      ? pageHead(`Outfit „${loaderData.name}“`, `Das Outfit „${loaderData.name}“ bearbeiten.`)
+      : pageHead("Outfit nicht gefunden", "Dieses Outfit gibt es nicht."),
   // Private page; offline it shows the offline copy.
   beforeLoad: requireSession,
   component: OutfitPage,

@@ -12,8 +12,13 @@ type AddTab = "foto" | "beleg";
 export const Route = createFileRoute("/profil_/hinzufuegen")({
   validateSearch: (search: Record<string, unknown>): { tab?: AddTab } =>
     search["tab"] === "beleg" ? { tab: "beleg" } : {},
-  head: () =>
-    pageHead("Hinzufügen", "Füge deinem Schrank Teile per Foto oder über einen Beleg hinzu."),
+  head: ({ match }) =>
+    match.search.tab === "beleg"
+      ? pageHead(
+          "Beleg hinzufügen",
+          "Lade einen Kaufbeleg hoch und lege die Teile daraus in deinem Schrank an.",
+        )
+      : pageHead("Teil hinzufügen", "Fotografiere ein Kleidungsstück für deinen Schrank."),
   // Private page; offline it shows the offline copy.
   beforeLoad: requireSession,
   component: AddPage,
@@ -34,7 +39,7 @@ function AddPage() {
         }
         className="add-tabs"
       >
-        <TabsList className="add-tabs-list">
+        <TabsList className="add-tabs-list h-auto">
           <TabsTrigger value="foto" className="add-tabs-trigger">
             Foto
           </TabsTrigger>

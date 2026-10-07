@@ -24,7 +24,18 @@ import { requireSession } from "@/lib/offline/session";
 export const Route = createFileRoute("/profil_/schrank/$id")({
   // The wardrobe's filters ride along, so "Zurück zum Schrank" restores them.
   validateSearch: parseWardrobeSearch,
-  head: () => pageHead("Teil", "Ein Teil aus deinem privaten Kleiderschrank."),
+  // Loads the item for the title; the page's query then finds it in the cache.
+  loader: ({ context, params }) =>
+    context.queryClient
+      .ensureQueryData({
+        queryKey: itemQueryKeys.detail(params.id),
+        queryFn: () => loadItem(params.id),
+      })
+      .catch(() => null),
+  head: ({ loaderData }) =>
+    loaderData
+      ? pageHead(loaderData.name, `${loaderData.name} aus deinem privaten Kleiderschrank.`)
+      : pageHead("Teil nicht gefunden", "Dieses Teil gibt es in deinem Schrank nicht."),
   // Private page; offline it shows the offline copy.
   beforeLoad: requireSession,
   component: ItemPage,

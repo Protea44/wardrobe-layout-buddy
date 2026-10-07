@@ -69,17 +69,18 @@ describe("POST /api/inbound/receipt", () => {
     };
   }
 
-  function post(payload: unknown, secret: string | undefined = SECRET) {
+  // null sends no secret header at all.
+  function post(payload: unknown, secret: string | null = SECRET) {
     return app.inject({
       method: "POST",
       url: "/api/inbound/receipt",
-      headers: secret === undefined ? {} : { "x-inbound-secret": secret },
+      headers: secret === null ? {} : { "x-inbound-secret": secret },
       payload: payload as Record<string, unknown>,
     });
   }
 
   it("refuses requests without the right secret", async () => {
-    expect((await post(mail(), undefined)).statusCode).toBe(401);
+    expect((await post(mail(), null)).statusCode).toBe(401);
     expect((await post(mail(), "wrong")).statusCode).toBe(401);
     expect((await post(mail(), `${SECRET}x`)).statusCode).toBe(401);
     expect(memory.objects.size).toBe(0);

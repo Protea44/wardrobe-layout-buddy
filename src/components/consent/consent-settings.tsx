@@ -77,7 +77,7 @@ function SettingsForm() {
       </div>
 
       <DialogFooter>
-        <Button type="button" onClick={() => saveSelection(statistics)}>
+        <Button type="button" className="h-11 px-6" onClick={() => saveSelection(statistics)}>
           Auswahl speichern
         </Button>
       </DialogFooter>

@@ -20,7 +20,7 @@ function NotFoundComponent() {
   return (
     <div className="site-container page-body">
       <h1 className="page-title">Seite nicht gefunden</h1>
-      <Button asChild className="not-found-link">
+      <Button asChild className="not-found-link h-11 px-6">
         <Link to="/">Zur Startseite</Link>
       </Button>
     </div>

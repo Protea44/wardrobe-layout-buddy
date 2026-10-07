@@ -136,7 +136,8 @@ describe("account routes", () => {
 
       const csv = files["kleidung.csv"] ?? new Uint8Array();
       expect([...csv.slice(0, 3)]).toEqual([0xef, 0xbb, 0xbf]);
-      const [header, row] = strFromU8(csv).slice(1).split("\r\n");
+      // strFromU8 (TextDecoder) drops the BOM checked above.
+      const [header, row] = strFromU8(csv).split("\r\n");
       expect(header?.split(";").slice(0, 3)).toEqual(["ID", "Name", "Kategorie"]);
       expect(row).toContain('"Leinenhemd; ""weiß"""');
       expect(row).toContain(";1234,50;14.03.2026;");

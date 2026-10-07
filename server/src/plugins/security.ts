@@ -16,6 +16,12 @@ export const securityPlugin = fp<SecurityOptions>(async (app, { config }) => {
       useDefaults: false,
       directives: {
         defaultSrc: ["'self'"],
+        // Scripts stay limited to our own files. Styles additionally allow
+        // inline <style> tags: the toast library (sonner) and the scroll lock
+        // of dialogs (react-remove-scroll) insert theirs at runtime, the
+        // latter with computed values, so neither hashes nor nonces fit.
+        scriptSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
         imgSrc: ["'self'", "blob:", "data:"],
         objectSrc: ["'none'"],
         baseUri: ["'self'"],

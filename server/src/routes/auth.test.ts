@@ -1,3 +1,6 @@
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
@@ -201,5 +204,31 @@ describe("authentication rate limit", () => {
     await app.close();
 
     expect(statuses).toEqual([401, 401, 401, 429]);
+  });
+});
+
+describe("session cookie in production", () => {
+  it("is HttpOnly, SameSite=Lax and Secure", async () => {
+    // Production also serves the frontend, so it needs a built shell.
+    const frontendDir = mkdtempSync(path.join(tmpdir(), "kk-frontend-"));
+    writeFileSync(path.join(frontendDir, "index.html"), "<!doctype html>");
+    const app = await buildTestApp({
+      config: { NODE_ENV: "production", FRONTEND_DIR: frontendDir },
+    });
+    try {
+      await resetDatabase(app);
+      const response = await app.inject({
+        method: "POST",
+        url: "/api/auth/sign-up/email",
+        headers: browserHeaders(app),
+        payload: { name: "Test", email: "secure@example.test", password: TEST_PASSWORD },
+      });
+
+      const session = response.cookies.find(({ name }) => name.endsWith("kk.session_token"));
+      expect(session).toMatchObject({ httpOnly: true, sameSite: "Lax", secure: true });
+    } finally {
+      await app.close();
+      rmSync(frontendDir, { recursive: true, force: true });
+    }
   });
 });

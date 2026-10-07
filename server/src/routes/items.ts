@@ -53,7 +53,9 @@ export const itemsRoutes: FastifyPluginAsync<ItemsOptions> = async (app, { confi
 
   // Encapsulated: only these routes accept multipart bodies.
   await app.register(multipart, {
-    limits: { fileSize: ITEM_PHOTO_MAX_BYTES, files: 2, fields: 1, parts: 3, fieldSize: 64 * 1024 },
+    // A few spare fields, so unexpected ones are answered with 400 below
+    // instead of the plugin's 413. Files stay limited to the two expected.
+    limits: { fileSize: ITEM_PHOTO_MAX_BYTES, files: 2, fields: 4, parts: 6, fieldSize: 64 * 1024 },
   });
 
   // One page of the user's active items, filtered, searched and sorted.
