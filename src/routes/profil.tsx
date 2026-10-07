@@ -46,7 +46,7 @@ function ProfilePage() {
       </dl>
       {error !== null && <AuthMessage>{error}</AuthMessage>}
       <Button asChild className="profile-add-item h-11 px-6">
-        <Link to="/teil-hinzufuegen">Teil hinzufügen</Link>
+        <Link to="/profil/hinzufuegen">Teil hinzufügen</Link>
       </Button>
       <Button
         type="button"

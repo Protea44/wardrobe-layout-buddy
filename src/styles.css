@@ -223,6 +223,36 @@
   .upload-progress { margin-bottom: 12px; }
   .upload-progress-text { margin-top: 6px; font-size: 13px; color: var(--muted-foreground); }
 
+  .add-tabs { margin-top: 32px; }
+  .add-tabs-list { display: grid; grid-template-columns: 1fr 1fr; width: 100%; height: auto; padding: 4px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); }
+  .add-tabs-trigger { min-height: 44px; font-size: 15px; }
+  .add-tabs-trigger:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; box-shadow: none; }
+
+  .receipt-tab { display: grid; gap: 48px; margin-top: 32px; }
+  .receipt-section { display: grid; gap: 16px; }
+  .receipt-section + .receipt-section { padding-top: 40px; border-top: 1px solid var(--gold); }
+  .receipt-section-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; }
+  .receipt-section-title { font-size: 30px; line-height: 1.2; }
+  .receipt-section-text { font-size: 15px; line-height: 1.7; color: var(--muted-foreground); }
+  .receipt-muted { font-size: 14px; line-height: 1.5; color: var(--muted-foreground); }
+  .status-badge { display: inline-flex; align-items: center; padding: 3px 10px; background: var(--navy); color: var(--gold); border-radius: var(--radius); font-size: 12px; font-weight: 600; }
+  .forwarding-address { display: flex; align-items: center; gap: 12px; padding: 12px 12px 12px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); }
+  .forwarding-address-value { flex: 1; min-width: 0; font-size: 15px; line-height: 1.5; overflow-wrap: anywhere; }
+  .receipt-drop-zone { min-height: 200px; }
+  .receipt-upload .upload-progress, .receipt-upload > .upload-progress-text, .receipt-upload .form-error { margin-top: 12px; }
+  .receipt-uploaded { font-size: 15px; line-height: 1.6; }
+  .receipt-uploaded a { text-decoration: underline; text-decoration-color: var(--gold); text-underline-offset: 5px; }
+  .receipt-item-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 22px 16px; }
+  .receipt-item-block { display: grid; gap: 24px; padding: 24px 16px; border: 1px solid var(--border); border-radius: var(--radius); }
+  .receipt-item-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .receipt-item-title { font-size: 24px; line-height: 1.25; }
+  .receipt-form-buttons { display: flex; flex-wrap: wrap; gap: 12px; }
+  .receipt-rows { display: grid; }
+  .receipt-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 16px; border-bottom: 1px solid var(--border); }
+  .receipt-row:first-child { border-top: 1px solid var(--border); }
+  .receipt-row-text { min-width: 0; }
+  .receipt-row-merchant { font-weight: 500; overflow-wrap: anywhere; }
+
   .item-saved { display: flex; flex-direction: column; align-items: center; gap: 24px; margin-top: 40px; padding: 32px 24px; text-align: center; border: 1px solid var(--border); border-radius: var(--radius); box-shadow: 0 1px 3px oklch(from var(--navy) l c h / 5%); }
   .item-saved-photo { width: 160px; height: 160px; object-fit: contain; border-radius: var(--radius); background: var(--surface); }
   .item-saved-title { font-size: 28px; line-height: 1.25; overflow-wrap: anywhere; }

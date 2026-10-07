@@ -10,4 +10,3 @@ export const seasonLabels: Record<Season, string> = {
 
 // The wardrobe overview does not exist yet; the profile stands in for it.
 export const WARDROBE_PATH = "/profil";
-export const ADD_ITEM_PATH = "/teil-hinzufuegen";

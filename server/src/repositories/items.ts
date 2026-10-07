@@ -1,4 +1,5 @@
 import type { ItemCreateInput, ItemResponse, ItemUpdateInput, LifecycleStatus } from "@shared/item";
+import type { ReceiptItemInput, ReceiptUpdateInput } from "@shared/receipt";
 
 import type { Item, PrismaClient } from "../generated/prisma/client";
 import { isRecordKey } from "../lib/storage-keys";
@@ -51,6 +52,10 @@ type ItemPhoto = {
   thumbnailKey: string | null;
 };
 
+// An item from a receipt. The id is chosen first because its photo is stored
+// before the row exists.
+type NewReceiptItem = ReceiptItemInput & { id: string } & Partial<ItemPhoto>;
+
 // Every function is scoped to userId: other users' items do not exist for it,
 // whatever their visibility says.
 export function createItemRepository(prisma: PrismaClient) {
@@ -98,6 +103,62 @@ export function createItemRepository(prisma: PrismaClient) {
         },
       });
       return toResponse(item);
+    },
+
+    // Creates all items linked to the receipt, and stores merchant and date on
+    // the receipt and on every item, in one transaction: all or nothing.
+    // Entering details by hand marks the receipt as MANUAL.
+    async createForReceipt(
+      userId: string,
+      receiptId: string,
+      details: ReceiptUpdateInput,
+      items: NewReceiptItem[],
+    ): Promise<ItemResponse[]> {
+      for (const item of items) {
+        for (const key of [item.photoKey, item.thumbnailKey]) {
+          if (key != null && !isRecordKey(key, userId, item.id)) throw new InvalidStorageKeyError();
+        }
+      }
+
+      const created = await prisma.$transaction(async (tx) => {
+        const { count } = await tx.receipt.updateMany({
+          where: { id: receiptId, userId },
+          data: {
+            parseStatus: "MANUAL",
+            ...defined({
+              merchant: details.merchant,
+              purchaseDate: fromDateOnly(details.purchaseDate),
+            }),
+          },
+        });
+        if (count === 0) throw new RelatedRecordNotFoundError("Receipt");
+
+        const rows: Item[] = [];
+        for (const item of items) {
+          rows.push(
+            await tx.item.create({
+              data: {
+                id: item.id,
+                userId,
+                receiptId,
+                name: item.name,
+                category: item.category,
+                ...defined({
+                  brand: item.brand,
+                  size: item.size,
+                  price: item.price,
+                  retailer: details.merchant,
+                  purchaseDate: fromDateOnly(details.purchaseDate),
+                  photoKey: item.photoKey,
+                  thumbnailKey: item.thumbnailKey,
+                }),
+              },
+            }),
+          );
+        }
+        return rows;
+      });
+      return created.map(toResponse);
     },
 
     async get(userId: string, id: string): Promise<ItemResponse | null> {

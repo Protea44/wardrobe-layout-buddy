@@ -9,18 +9,21 @@ datasource db {
 
 // Tables managed by Better Auth. Field names follow its core schema.
 model User {
-  id            String    @id
-  name          String
-  email         String    @unique
-  emailVerified Boolean   @default(false)
-  image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  sessions      Session[]
-  accounts      Account[]
-  items         Item[]
-  receipts      Receipt[]
-  outfits       Outfit[]
+  id              String    @id
+  name            String
+  email           String    @unique
+  emailVerified   Boolean   @default(false)
+  image           String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  // Local part of the receipt forwarding address ({alias}@<RECEIPT_EMAIL_DOMAIN>).
+  // Random and unguessable; created on first use.
+  forwardingAlias String?   @unique
+  sessions        Session[]
+  accounts        Account[]
+  items           Item[]
+  receipts        Receipt[]
+  outfits         Outfit[]
 
   @@map("user")
 }

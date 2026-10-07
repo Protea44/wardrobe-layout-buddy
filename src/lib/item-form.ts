@@ -10,7 +10,7 @@ import {
   type ItemUploadInput,
 } from "@shared/item";
 
-const optionalText = (label: string, max: number) =>
+export const optionalText = (label: string, max: number) =>
   z.string().trim().max(max, `${label} darf höchstens ${max} Zeichen lang sein.`);
 
 // "49,90", "1.234,56" and "49.90" all become "49.90"; null if not a price.
@@ -23,26 +23,33 @@ export function normalizePrice(value: string): string | null {
 const isCategory = (value: string): value is ItemCategory =>
   (itemCategories as readonly string[]).includes(value);
 
+// Field rules shared by the photo form and the receipt form.
+export const categoryField = z.string().refine(isCategory, "Bitte wähle eine Kategorie.");
+
+export const priceField = z
+  .string()
+  .trim()
+  .refine(
+    (value) => value === "" || normalizePrice(value) !== null,
+    "Bitte gib einen gültigen Preis ein, z. B. 49,90.",
+  );
+
+export const dateField = z
+  .string()
+  .refine(
+    (value) => value === "" || dateOnlySchema.safeParse(value).success,
+    "Bitte gib ein gültiges Datum ein.",
+  );
+
 // What the capture form holds: every input is a string, empty means "not set".
 export const itemFormSchema = z.object({
-  category: z.string().refine(isCategory, "Bitte wähle eine Kategorie."),
+  category: categoryField,
   color: z.union([itemColorSchema, z.literal("")]),
   name: optionalText("Der Name", 120),
   brand: optionalText("Die Marke", 80),
   size: optionalText("Die Größe", 40),
-  price: z
-    .string()
-    .trim()
-    .refine(
-      (value) => value === "" || normalizePrice(value) !== null,
-      "Bitte gib einen gültigen Preis ein, z. B. 49,90.",
-    ),
-  purchaseDate: z
-    .string()
-    .refine(
-      (value) => value === "" || dateOnlySchema.safeParse(value).success,
-      "Bitte gib ein gültiges Datum ein.",
-    ),
+  price: priceField,
+  purchaseDate: dateField,
   material: optionalText("Das Material", 120),
   retailer: optionalText("Der Händler", 120),
   seasons: z.array(seasonSchema),

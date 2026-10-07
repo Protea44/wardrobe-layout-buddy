@@ -4,6 +4,7 @@ import {
   fitWithin,
   ImagePipelineError,
   PHOTO_MAX_EDGE,
+  prepareReceiptFile,
   processPhoto,
   removeBackground,
   THUMBNAIL_MAX_EDGE,
@@ -44,5 +45,25 @@ describe("processPhoto", () => {
 
     expect(error).toBeInstanceOf(ImagePipelineError);
     expect((error as Error).message).toMatch(/JPEG-, PNG- oder WebP-Foto/);
+  });
+});
+
+describe("prepareReceiptFile", () => {
+  it("passes PDFs through unchanged", async () => {
+    const pdf = new File(["%PDF-1.7"], "rechnung.pdf", { type: "application/pdf" });
+
+    const prepared = await prepareReceiptFile(pdf);
+
+    expect(prepared.type).toBe("application/pdf");
+    expect(prepared.size).toBe(pdf.size);
+  });
+
+  it("refuses other file types with a German message", async () => {
+    const error = await prepareReceiptFile(
+      new File(["GIF89a"], "beleg.gif", { type: "image/gif" }),
+    ).catch((caught: unknown) => caught);
+
+    expect(error).toBeInstanceOf(ImagePipelineError);
+    expect((error as Error).message).toBe("Bitte wähle eine PDF-, JPG- oder PNG-Datei.");
   });
 });

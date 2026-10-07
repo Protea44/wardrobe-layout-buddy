@@ -20,6 +20,7 @@ import { Route as PasswortVergessenRouteImport } from './routes/passwort-vergess
 import { Route as PasswortZuruecksetzenRouteImport } from './routes/passwort-zuruecksetzen'
 import { Route as ProfilRouteImport } from './routes/profil'
 import { Route as TeilHinzufuegenRouteImport } from './routes/teil-hinzufuegen'
+import { Route as ProfilHinzufuegenRouteImport } from './routes/profil_.hinzufuegen'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -76,6 +77,11 @@ const TeilHinzufuegenRoute = TeilHinzufuegenRouteImport.update({
   path: '/teil-hinzufuegen',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProfilHinzufuegenRoute = ProfilHinzufuegenRouteImport.update({
+  id: '/profil_/hinzufuegen',
+  path: '/profil/hinzufuegen',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -89,6 +95,7 @@ export interface FileRoutesByFullPath {
   '/passwort-zuruecksetzen': typeof PasswortZuruecksetzenRoute
   '/profil': typeof ProfilRoute
   '/teil-hinzufuegen': typeof TeilHinzufuegenRoute
+  '/profil/hinzufuegen': typeof ProfilHinzufuegenRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -102,6 +109,7 @@ export interface FileRoutesByTo {
   '/passwort-zuruecksetzen': typeof PasswortZuruecksetzenRoute
   '/profil': typeof ProfilRoute
   '/teil-hinzufuegen': typeof TeilHinzufuegenRoute
+  '/profil/hinzufuegen': typeof ProfilHinzufuegenRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -116,6 +124,7 @@ export interface FileRoutesById {
   '/passwort-zuruecksetzen': typeof PasswortZuruecksetzenRoute
   '/profil': typeof ProfilRoute
   '/teil-hinzufuegen': typeof TeilHinzufuegenRoute
+  '/profil_/hinzufuegen': typeof ProfilHinzufuegenRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -131,6 +140,7 @@ export interface FileRouteTypes {
     | '/passwort-zuruecksetzen'
     | '/profil'
     | '/teil-hinzufuegen'
+    | '/profil/hinzufuegen'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -144,6 +154,7 @@ export interface FileRouteTypes {
     | '/passwort-zuruecksetzen'
     | '/profil'
     | '/teil-hinzufuegen'
+    | '/profil/hinzufuegen'
   id:
     | '__root__'
     | '/'
@@ -157,6 +168,7 @@ export interface FileRouteTypes {
     | '/passwort-zuruecksetzen'
     | '/profil'
     | '/teil-hinzufuegen'
+    | '/profil_/hinzufuegen'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -171,6 +183,7 @@ export interface RootRouteChildren {
   PasswortZuruecksetzenRoute: typeof PasswortZuruecksetzenRoute
   ProfilRoute: typeof ProfilRoute
   TeilHinzufuegenRoute: typeof TeilHinzufuegenRoute
+  ProfilHinzufuegenRoute: typeof ProfilHinzufuegenRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -252,6 +265,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeilHinzufuegenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/profil_/hinzufuegen': {
+      id: '/profil_/hinzufuegen'
+      path: '/profil/hinzufuegen'
+      fullPath: '/profil/hinzufuegen'
+      preLoaderRoute: typeof ProfilHinzufuegenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -267,6 +287,7 @@ const rootRouteChildren: RootRouteChildren = {
   PasswortZuruecksetzenRoute: PasswortZuruecksetzenRoute,
   ProfilRoute: ProfilRoute,
   TeilHinzufuegenRoute: TeilHinzufuegenRoute,
+  ProfilHinzufuegenRoute: ProfilHinzufuegenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

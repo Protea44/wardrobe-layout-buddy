@@ -5,6 +5,9 @@ import { suggestColor } from "@/lib/color-suggestion";
 export const PHOTO_MAX_EDGE = 1600;
 export const THUMBNAIL_MAX_EDGE = 400;
 export const WEBP_QUALITY = 0.82;
+// Receipts keep more pixels so small print stays legible.
+export const RECEIPT_MAX_EDGE = 2400;
+export const RECEIPT_JPEG_QUALITY = 0.9;
 // Side length of the downscaled center area the color is read from.
 const COLOR_SAMPLE_EDGE = 64;
 
@@ -42,6 +45,7 @@ function sizeOf(image: Drawable): Size {
   return { width: image.width, height: image.height };
 }
 
+const ENCODE_ERROR = "Das Foto konnte nicht verarbeitet werden. Bitte versuche es erneut.";
 const DECODE_ERROR =
   "Dieses Foto kann dein Browser nicht öffnen. Bitte wähle ein JPEG-, PNG- oder WebP-Foto.";
 
@@ -114,9 +118,7 @@ async function encode(canvas: HTMLCanvasElement): Promise<Blob> {
   if (webp?.type === "image/webp") return webp;
   const jpeg = await toBlob(canvas, "image/jpeg", WEBP_QUALITY);
   if (jpeg) return jpeg;
-  throw new ImagePipelineError(
-    "Das Foto konnte nicht verarbeitet werden. Bitte versuche es erneut.",
-  );
+  throw new ImagePipelineError(ENCODE_ERROR);
 }
 
 // The garment is usually in the middle; the edges are mostly background.
@@ -144,6 +146,29 @@ export async function processPhoto(file: Blob): Promise<ProcessedPhoto> {
     const [photo, thumbnail] = await Promise.all([encode(photoCanvas), encode(thumbnailCanvas)]);
 
     return { photo, thumbnail, suggestedColor: suggestColor(centerPixels(photoCanvas)) };
+  } finally {
+    if ("close" in decoded) decoded.close();
+  }
+}
+
+const RECEIPT_TYPE_ERROR = "Bitte wähle eine PDF-, JPG- oder PNG-Datei.";
+
+// Readies a receipt for upload. PDFs are sent as they are; photos of receipts
+// are re-encoded as JPEG (the receipt upload takes PDF, JPEG and PNG), which
+// drops EXIF and GPS data like every other photo.
+export async function prepareReceiptFile(file: File): Promise<Blob> {
+  const isPdf = file.type === "application/pdf" || /\.pdf$/i.test(file.name);
+  if (isPdf) return file.slice(0, file.size, "application/pdf");
+  if (file.type !== "image/jpeg" && file.type !== "image/png") {
+    throw new ImagePipelineError(RECEIPT_TYPE_ERROR);
+  }
+
+  const decoded = await decode(file);
+  try {
+    const canvas = draw(decoded, fitWithin(sizeOf(decoded), RECEIPT_MAX_EDGE));
+    const jpeg = await toBlob(canvas, "image/jpeg", RECEIPT_JPEG_QUALITY);
+    if (!jpeg) throw new ImagePipelineError(ENCODE_ERROR);
+    return jpeg;
   } finally {
     if ("close" in decoded) decoded.close();
   }

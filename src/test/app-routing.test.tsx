@@ -14,4 +14,12 @@ describe("App routing", () => {
 
     expect(matches.at(-1)?.routeId).not.toBe(rootRouteId);
   });
+
+  it("matches the add page instead of falling back to not found", () => {
+    const router = createRouter({ routeTree, context: { queryClient: new QueryClient() } });
+
+    const matches = router.matchRoutes("/profil/hinzufuegen", { tab: "beleg" });
+
+    expect(matches.at(-1)?.routeId).toBe("/profil_/hinzufuegen");
+  });
 });
