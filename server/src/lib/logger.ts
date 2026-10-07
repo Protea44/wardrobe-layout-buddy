@@ -27,7 +27,7 @@ export function loggerOptions(
     serializers: {
       req: (request: { method: string; url: string }) => ({
         method: request.method,
-        url: request.url.split("?")[0],
+        url: request.url.split("?")[0] ?? "",
       }),
     },
     ...(stream !== undefined && { stream }),

@@ -2,6 +2,7 @@
   "include": [
     "src/**/*.ts",
     "src/**/*.tsx",
+    "shared/**/*.ts",
     "vite.config.ts",
     "vitest.config.ts",
     "eslint.config.js"
@@ -10,14 +11,19 @@
     "target": "ES2022",
     "jsx": "react-jsx",
     "module": "ESNext",
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "types": ["vite/client", "vitest/globals"],
-
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "types": [
+      "vite/client",
+      "vitest/globals"
+    ],
     "moduleResolution": "Bundler",
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": false,
     "noEmit": true,
-
     "skipLibCheck": true,
     "strict": true,
     "noUnusedLocals": false,
@@ -30,7 +36,12 @@
     "exactOptionalPropertyTypes": true,
     "noUncheckedSideEffectImports": true,
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": [
+        "./src/*"
+      ],
+      "@shared/*": [
+        "./shared/*"
+      ]
     }
   }
 }

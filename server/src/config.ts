@@ -16,7 +16,7 @@ const configSchema = z.object({
   TRUST_PROXY: booleanString.default("false"),
   RATE_LIMIT_MAX: z.coerce.number().int().positive().default(300),
   BODY_LIMIT_BYTES: z.coerce.number().int().positive().default(1_048_576),
-  FRONTEND_DIR: z.string().min(1).default(path.join(repoRoot, "dist/client")),
+  FRONTEND_DIR: z.string().min(1).default(path.join(repoRoot, "dist")),
 
   DATABASE_URL: z.string().url(),
 

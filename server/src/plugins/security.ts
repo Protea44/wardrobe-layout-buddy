@@ -6,11 +6,9 @@ import type { AppConfig } from "../config";
 
 type SecurityOptions = {
   config: Pick<AppConfig, "NODE_ENV" | "RATE_LIMIT_MAX">;
-  // Hashes of the inline scripts in the frontend shell, see lib/frontend.ts.
-  scriptHashes: string[];
 };
 
-export const securityPlugin = fp<SecurityOptions>(async (app, { config, scriptHashes }) => {
+export const securityPlugin = fp<SecurityOptions>(async (app, { config }) => {
   const production = config.NODE_ENV === "production";
 
   await app.register(helmet, {
@@ -19,7 +17,6 @@ export const securityPlugin = fp<SecurityOptions>(async (app, { config, scriptHa
       directives: {
         defaultSrc: ["'self'"],
         imgSrc: ["'self'", "blob:", "data:"],
-        scriptSrc: ["'self'", ...scriptHashes],
         objectSrc: ["'none'"],
         baseUri: ["'self'"],
         formAction: ["'self'"],

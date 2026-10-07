@@ -29,10 +29,7 @@ export async function buildApp({ config, storage, resolveUserId, logStream }: Bu
 
   const frontend = config.NODE_ENV === "production" ? loadFrontend(config.FRONTEND_DIR) : null;
 
-  await app.register(securityPlugin, {
-    config,
-    scriptHashes: frontend?.inlineScriptHashes ?? [],
-  });
+  await app.register(securityPlugin, { config });
   await app.register(prismaPlugin, { databaseUrl: config.DATABASE_URL });
   await app.register(storagePlugin, { storage: storage ?? createStorage(config) });
   await app.register(authPlugin, resolveUserId ? { resolveUserId } : {});
@@ -45,7 +42,7 @@ export async function buildApp({ config, storage, resolveUserId, logStream }: Bu
     { prefix: "/api" },
   );
 
-  if (frontend) await app.register(frontendPlugin, { frontend });
+  await app.register(frontendPlugin, { frontend });
 
   return app;
 }

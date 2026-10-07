@@ -4,14 +4,30 @@ German-language, fully responsive web app: a private digital wardrobe and purcha
 
 ## Tech stack
 - Frontend (repo root, originally generated with Lovable): React, TypeScript, Vite, Tailwind, shadcn/ui.
-- Backend (/server): Node.js 20+, TypeScript, Fastify, Prisma, PostgreSQL, Better Auth, S3-compatible object storage (MinIO locally).
+- Backend (/server): Node.js 20+, TypeScript, Fastify, Prisma, PostgreSQL, Better Auth, S3-compatible object storage (SeaweedFS locally).
 - Shared zod schemas and types in /shared.
-- Local services via docker-compose.yml: postgres, minio, mailpit.
+- Local services via docker-compose.yml: postgres, storage (SeaweedFS), mailpit.
 - Dev: Vite proxies /api to the backend. Production: the backend serves the built frontend and /api from the same origin.
 - Do NOT use Supabase, Firebase, Lovable Cloud or any other hosted backend service.
 
 ## Commands
-(to be filled in during the backend setup task)
+First-time setup: copy `.env.example` to `.env` and replace every `change-me`, then `npm install` (one install for the root and /server workspaces).
+
+```sh
+docker compose up -d   # postgres, storage, mailpit (mail UI: http://127.0.0.1:8025)
+npm run db:migrate     # apply migrations to the dev database; creates one after a schema change
+npm run dev            # frontend on :5173 and backend on :3000, /api proxied to the backend
+npm run typecheck      # tsc for frontend and backend
+npm run lint           # eslint, with prettier as a rule
+npm test               # frontend tests, then backend tests
+npm run build          # frontend to dist/, backend to server/dist/
+npm run start          # run the built backend; with NODE_ENV=production it also serves dist/
+```
+
+- Single test file: `npx vitest run src/lib/api.test.ts` (frontend), `npm run test -w server -- src/routes/health.test.ts` (backend).
+- Backend tests need the docker services. They run against `TEST_DATABASE_URL` (migrated automatically) and the local storage service under a throwaway key prefix.
+- `npm run dev:web` and `npm run dev:api` start one side only.
+- Do not put NODE_ENV in `.env`: Vite reads that file and would ship a development build.
 
 ## Language
 - All user-facing text is German (de-DE), informal "du". Code, comments and identifiers in English.

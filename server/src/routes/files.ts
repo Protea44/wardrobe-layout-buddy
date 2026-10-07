@@ -33,10 +33,7 @@ export const filesRoutes: FastifyPluginAsync<FilesOptions> = async (app, { confi
       return sendNotFound(reply);
     }
 
-    const object = await app.storage.getObjectStream(
-      buckets[params.data.bucket],
-      params.data["*"],
-    );
+    const object = await app.storage.getObjectStream(buckets[params.data.bucket], params.data["*"]);
     if (object === null) return sendNotFound(reply);
 
     reply

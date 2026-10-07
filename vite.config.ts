@@ -12,6 +12,13 @@ export default defineConfig({
     tailwindcss(),
   ],
   resolve: {
-    alias: { "@": path.resolve(import.meta.dirname, "./src") },
+    alias: {
+      "@": path.resolve(import.meta.dirname, "./src"),
+      "@shared": path.resolve(import.meta.dirname, "./shared"),
+    },
+  },
+  server: {
+    // The backend listens on PORT from .env (default 3000).
+    proxy: { "/api": "http://127.0.0.1:3000" },
   },
 });

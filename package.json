@@ -3,15 +3,22 @@
   "private": true,
   "sideEffects": false,
   "type": "module",
+  "workspaces": [
+    "server"
+  ],
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
+    "dev": "concurrently --names web,api --prefix-colors auto \"npm:dev:web\" \"npm:dev:api\"",
+    "dev:web": "vite",
+    "dev:api": "npm run dev -w server",
+    "build": "vite build && npm run build -w server",
     "preview": "vite preview",
+    "start": "npm run start -w server",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "typecheck": "tsc --noEmit",
-    "test": "vitest run",
-    "test:watch": "vitest"
+    "typecheck": "tsc --noEmit && npm run typecheck -w server",
+    "test": "vitest run && npm run test -w server",
+    "test:watch": "vitest",
+    "db:migrate": "npm run db:migrate -w server"
   },
   "dependencies": {
     "@fontsource/cormorant-garamond": "^5.3.0",
@@ -75,6 +82,7 @@
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^5.2.0",
+    "concurrently": "^10.0.5",
     "eslint": "^9.32.0",
     "eslint-config-prettier": "^10.1.1",
     "eslint-plugin-prettier": "^5.2.6",
