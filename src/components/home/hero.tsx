@@ -11,8 +11,8 @@ export function Hero() {
             Dein Kleiderschrank. Belegt, sortiert, griffbereit.
           </h1>
           <p className="home-subline">
-            Erfasse deine Kleidung in Sekunden – per Foto oder Kaufbeleg. Privat,
-            sicher und in der EU gespeichert.
+            Erfasse deine Kleidung in Sekunden – per Foto oder Kaufbeleg. Privat, sicher und in der
+            EU gespeichert.
           </p>
           <div className="home-actions">
             <Button asChild variant="inverse" className="h-12 px-9 text-base">

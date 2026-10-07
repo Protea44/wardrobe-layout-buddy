@@ -6,7 +6,11 @@ import { ClosingCta } from "@/components/home/closing-cta";
 import { pageHead } from "@/config/site";
 
 export const Route = createFileRoute("/")({
-  head: () => pageHead("Startseite", "Dein privater Kleiderschrank im Netz: Kleidung in Sekunden erfassen, Kaufbelege aufbewahren und alles wiederfinden."),
+  head: () =>
+    pageHead(
+      "Startseite",
+      "Dein privater Kleiderschrank im Netz: Kleidung in Sekunden erfassen, Kaufbelege aufbewahren und alles wiederfinden.",
+    ),
   component: HomePage,
 });
 

@@ -16,7 +16,8 @@ const buttonVariants = cva(
         secondary: "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
-        footerLink: "h-auto justify-start rounded-none p-0 text-inverse-foreground font-normal hover:underline underline-offset-4 decoration-gold",
+        footerLink:
+          "h-auto justify-start rounded-none p-0 text-inverse-foreground font-normal hover:underline underline-offset-4 decoration-gold",
         menu: "text-inverse-foreground hover:bg-inverse-foreground/10",
         mobileTrigger: "hidden max-md:inline-flex hover:bg-accent hover:text-accent-foreground",
         inverse: "bg-gold text-navy hover:bg-gold/90",

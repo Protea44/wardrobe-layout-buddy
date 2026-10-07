@@ -10,7 +10,9 @@ export function MobileNavigation() {
 
   useEffect(() => {
     const media = window.matchMedia("(min-width: 768px)");
-    const closeOnDesktop = () => { if (media.matches) setOpen(false); };
+    const closeOnDesktop = () => {
+      if (media.matches) setOpen(false);
+    };
     media.addEventListener("change", closeOnDesktop);
     return () => media.removeEventListener("change", closeOnDesktop);
   }, []);
@@ -18,22 +20,42 @@ export function MobileNavigation() {
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
       <Dialog.Trigger asChild>
-        <Button variant="mobileTrigger" size="icon" aria-label="Menü öffnen" aria-expanded={open} aria-controls="mobile-navigation">
+        <Button
+          variant="mobileTrigger"
+          size="icon"
+          aria-label="Menü öffnen"
+          aria-expanded={open}
+          aria-controls="mobile-navigation"
+        >
           <Menu aria-hidden="true" />
         </Button>
       </Dialog.Trigger>
       <Dialog.Portal>
         <Dialog.Overlay className="menu-overlay" />
-        <Dialog.Content id="mobile-navigation" className="mobile-panel" aria-describedby={undefined}>
+        <Dialog.Content
+          id="mobile-navigation"
+          className="mobile-panel"
+          aria-describedby={undefined}
+        >
           <div className="mobile-panel-top">
             <Dialog.Title className="mobile-panel-title">Navigation</Dialog.Title>
             <Dialog.Close asChild>
-              <Button variant="menu" size="icon" aria-label="Menü schließen"><X aria-hidden="true" /></Button>
+              <Button variant="menu" size="icon" aria-label="Menü schließen">
+                <X aria-hidden="true" />
+              </Button>
             </Dialog.Close>
           </div>
           <nav className="mobile-nav" aria-label="Hauptnavigation">
             {primaryNavigation.map((item) => (
-              <Link key={item.to} to={item.to} className="nav-link" activeOptions={{ exact: true }} onClick={() => setOpen(false)}>{item.label}</Link>
+              <Link
+                key={item.to}
+                to={item.to}
+                className="nav-link"
+                activeOptions={{ exact: true }}
+                onClick={() => setOpen(false)}
+              >
+                {item.label}
+              </Link>
             ))}
           </nav>
         </Dialog.Content>

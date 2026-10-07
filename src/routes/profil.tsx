@@ -7,4 +7,6 @@ export const Route = createFileRoute("/profil")({
   component: ProfilePage,
 });
 
-function ProfilePage() { return <PlaceholderPage title="Mein Profil" />; }
+function ProfilePage() {
+  return <PlaceholderPage title="Mein Profil" />;
+}

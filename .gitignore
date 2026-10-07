@@ -8,18 +8,17 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
-package-lock.json
 dist
-dist-ssr
-.output
-.vinxi
 .tanstack/**
-.nitro
 *.local
 
-# Wrangler / Cloudflare
-.wrangler/
-.dev.vars
+# Environment files with secrets
+.env
+.env.*
+!.env.example
+
+# Generated Prisma client
+server/src/generated
 
 # Editor directories and files
 .vscode/*
