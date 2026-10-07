@@ -12,6 +12,7 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { ConsentManager } from "@/components/consent/consent-manager";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { Button } from "@/components/ui/button";
@@ -106,6 +107,7 @@ function RootComponent() {
           <Outlet />
         </main>
         <Footer />
+        <ConsentManager />
       </div>
     </QueryClientProvider>
   );
