@@ -2,11 +2,11 @@ import type { ZodType } from "zod";
 
 import { apiErrorSchema } from "@shared/api-error";
 
-const API_BASE = "/api";
+export const API_BASE = "/api";
 
-const NETWORK_ERROR_MESSAGE =
+export const NETWORK_ERROR_MESSAGE =
   "Keine Verbindung zum Server. Bitte prüfe deine Internetverbindung und versuche es erneut.";
-const UNEXPECTED_RESPONSE_MESSAGE =
+export const UNEXPECTED_RESPONSE_MESSAGE =
   "Der Server hat unerwartet geantwortet. Bitte versuche es später erneut.";
 
 const STATUS_MESSAGES: Record<number, string> = {
@@ -15,6 +15,7 @@ const STATUS_MESSAGES: Record<number, string> = {
   403: "Dafür fehlt dir die Berechtigung.",
   404: "Der Eintrag wurde nicht gefunden.",
   413: "Die Datei ist zu groß.",
+  415: "Dieses Dateiformat wird nicht unterstützt. Erlaubt sind JPEG, PNG und WebP.",
   429: "Zu viele Anfragen. Bitte warte einen Moment und versuche es erneut.",
 };
 const SERVER_ERROR_MESSAGE = "Etwas ist schiefgelaufen. Bitte versuche es später erneut.";
@@ -66,19 +67,22 @@ export async function api<T = unknown>(path: string, options: ApiOptions<T> = {}
 
   const data = await readJson(response);
 
-  if (!response.ok) {
-    const apiError = apiErrorSchema.safeParse(data);
-    throw new ApiError(
-      STATUS_MESSAGES[response.status] ?? SERVER_ERROR_MESSAGE,
-      response.status,
-      apiError.success ? apiError.data.error : null,
-    );
-  }
+  if (!response.ok) throw errorForStatus(response.status, data);
 
   if (!schema) return data as T;
   const parsed = schema.safeParse(data);
   if (!parsed.success) throw new ApiError(UNEXPECTED_RESPONSE_MESSAGE, response.status);
   return parsed.data;
+}
+
+// German error for a non-2xx response with the parsed body `data`.
+export function errorForStatus(status: number, data: unknown) {
+  const apiError = apiErrorSchema.safeParse(data);
+  return new ApiError(
+    STATUS_MESSAGES[status] ?? SERVER_ERROR_MESSAGE,
+    status,
+    apiError.success ? apiError.data.error : null,
+  );
 }
 
 async function readJson(response: Response): Promise<unknown> {

@@ -1,4 +1,4 @@
-import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { AuthMessage } from "@/components/auth/auth-page";
 import { Button } from "@/components/ui/button";
@@ -45,6 +45,9 @@ function ProfilePage() {
         <dd>{user.email}</dd>
       </dl>
       {error !== null && <AuthMessage>{error}</AuthMessage>}
+      <Button asChild className="profile-add-item h-11 px-6">
+        <Link to="/teil-hinzufuegen">Teil hinzufügen</Link>
+      </Button>
       <Button
         type="button"
         variant="outline"
