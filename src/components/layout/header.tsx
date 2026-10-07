@@ -10,7 +10,7 @@ export function Header() {
         <Logo />
         <nav className="desktop-nav" aria-label="Hauptnavigation">
           {primaryNavigation.map((item) => (
-            <Link key={item.to} to={item.to} className="nav-link" activeOptions={{ exact: true }}>
+            <Link key={item.to} to={item.to} className="nav-link">
               {item.label}
             </Link>
           ))}

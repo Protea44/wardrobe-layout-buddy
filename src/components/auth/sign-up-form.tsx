@@ -27,7 +27,7 @@ export function SignUpForm() {
       setError(authErrorMessage(result.error));
       return;
     }
-    await navigate({ to: "/profil" });
+    await navigate({ to: "/profil/schrank" });
   }
 
   return (

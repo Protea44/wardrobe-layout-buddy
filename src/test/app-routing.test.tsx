@@ -14,4 +14,18 @@ describe("App routing", () => {
 
     expect(matches.at(-1)?.routeId).not.toBe(rootRouteId);
   });
+
+  it("matches every page of the profile area below the /profil layout", () => {
+    const router = createRouter({ routeTree, context: { queryClient: new QueryClient() } });
+
+    for (const path of [
+      "/profil/schrank",
+      "/profil/hinzufuegen",
+      "/profil/outfits",
+      "/profil/einstellungen",
+    ]) {
+      const routeIds = router.matchRoutes(path).map(({ routeId }) => routeId);
+      expect(routeIds, path).toEqual([rootRouteId, "/profil", path]);
+    }
+  });
 });

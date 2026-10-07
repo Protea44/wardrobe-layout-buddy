@@ -1,59 +1,35 @@
-import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
-import { AuthMessage } from "@/components/auth/auth-page";
-import { Button } from "@/components/ui/button";
-import { authErrorMessage } from "@/config/auth";
-import { pageHead } from "@/config/site";
-import { authClient } from "@/lib/auth-client";
+import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 
+import { meResponseSchema } from "@shared/me";
+
+import { ProfileSubNavigation, ProfileTabBar } from "@/components/profile/profile-navigation";
+import { api, ApiError } from "@/lib/api";
+
+// Layout for everything below /profil. All of it is private: without a session
+// the visitor is sent to the login. The backend checks every request again.
 export const Route = createFileRoute("/profil")({
-  head: () => pageHead("Mein Profil", "Dein persönliches Profil bei Kleiderschrank Kompakt."),
-  // Private page: without a session the visitor is sent to the login.
   beforeLoad: async () => {
-    const { data } = await authClient.getSession();
-    if (!data) throw redirect({ to: "/login" });
-    return { user: data.user };
+    try {
+      return { me: await api("/me", { schema: meResponseSchema }) };
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 401) throw redirect({ to: "/login" });
+      throw error;
+    }
   },
-  component: ProfilePage,
+  component: ProfileLayout,
 });
 
-function ProfilePage() {
-  const { user } = Route.useRouteContext();
-  const navigate = useNavigate();
-  const [error, setError] = useState<string | null>(null);
-  const [pending, setPending] = useState(false);
-
-  async function signOut() {
-    setError(null);
-    setPending(true);
-    const result = await authClient.signOut();
-    setPending(false);
-    if (result.error) {
-      setError(authErrorMessage(result.error));
-      return;
-    }
-    await navigate({ to: "/" });
-  }
+function ProfileLayout() {
+  const { me } = Route.useRouteContext();
 
   return (
-    <div className="site-container page-body">
-      <h1 className="page-title">Mein Profil</h1>
-      <dl className="profile-details">
-        <dt>Name</dt>
-        <dd>{user.name}</dd>
-        <dt>E-Mail-Adresse</dt>
-        <dd>{user.email}</dd>
-      </dl>
-      {error !== null && <AuthMessage>{error}</AuthMessage>}
-      <Button
-        type="button"
-        variant="outline"
-        className="profile-sign-out h-11 px-6"
-        onClick={signOut}
-        disabled={pending}
-      >
-        Abmelden
-      </Button>
+    <div className="profile-area">
+      <ProfileSubNavigation />
+      <div className="site-container">
+        <p className="profile-greeting">Hallo, {me.displayName}</p>
+      </div>
+      <Outlet />
+      <ProfileTabBar />
     </div>
   );
 }

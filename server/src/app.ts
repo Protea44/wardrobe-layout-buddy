@@ -13,6 +13,7 @@ import { storagePlugin } from "./plugins/storage";
 import { authRoutes } from "./routes/auth";
 import { filesRoutes } from "./routes/files";
 import { healthRoutes } from "./routes/health";
+import { meRoutes } from "./routes/me";
 
 export type BuildAppOptions = {
   config: AppConfig;
@@ -40,6 +41,7 @@ export async function buildApp({ config, storage, mailer, logStream }: BuildAppO
     async (api) => {
       await api.register(healthRoutes);
       await api.register(authRoutes, { config });
+      await api.register(meRoutes);
       await api.register(filesRoutes, { config });
     },
     { prefix: "/api" },

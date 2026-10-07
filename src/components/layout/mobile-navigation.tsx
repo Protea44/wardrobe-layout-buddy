@@ -47,13 +47,7 @@ export function MobileNavigation() {
           </div>
           <nav className="mobile-nav" aria-label="Hauptnavigation">
             {primaryNavigation.map((item) => (
-              <Link
-                key={item.to}
-                to={item.to}
-                className="nav-link"
-                activeOptions={{ exact: true }}
-                onClick={() => setOpen(false)}
-              >
+              <Link key={item.to} to={item.to} className="nav-link" onClick={() => setOpen(false)}>
                 {item.label}
               </Link>
             ))}

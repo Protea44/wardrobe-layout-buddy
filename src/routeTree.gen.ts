@@ -19,6 +19,11 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as PasswortVergessenRouteImport } from './routes/passwort-vergessen'
 import { Route as PasswortZuruecksetzenRouteImport } from './routes/passwort-zuruecksetzen'
 import { Route as ProfilRouteImport } from './routes/profil'
+import { Route as ProfilIndexRouteImport } from './routes/profil/index'
+import { Route as ProfilEinstellungenRouteImport } from './routes/profil/einstellungen'
+import { Route as ProfilHinzufuegenRouteImport } from './routes/profil/hinzufuegen'
+import { Route as ProfilOutfitsRouteImport } from './routes/profil/outfits'
+import { Route as ProfilSchrankRouteImport } from './routes/profil/schrank'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -70,6 +75,31 @@ const ProfilRoute = ProfilRouteImport.update({
   path: '/profil',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProfilIndexRoute = ProfilIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ProfilRoute,
+} as any)
+const ProfilEinstellungenRoute = ProfilEinstellungenRouteImport.update({
+  id: '/einstellungen',
+  path: '/einstellungen',
+  getParentRoute: () => ProfilRoute,
+} as any)
+const ProfilHinzufuegenRoute = ProfilHinzufuegenRouteImport.update({
+  id: '/hinzufuegen',
+  path: '/hinzufuegen',
+  getParentRoute: () => ProfilRoute,
+} as any)
+const ProfilOutfitsRoute = ProfilOutfitsRouteImport.update({
+  id: '/outfits',
+  path: '/outfits',
+  getParentRoute: () => ProfilRoute,
+} as any)
+const ProfilSchrankRoute = ProfilSchrankRouteImport.update({
+  id: '/schrank',
+  path: '/schrank',
+  getParentRoute: () => ProfilRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -81,7 +111,12 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/passwort-vergessen': typeof PasswortVergessenRoute
   '/passwort-zuruecksetzen': typeof PasswortZuruecksetzenRoute
-  '/profil': typeof ProfilRoute
+  '/profil': typeof ProfilRouteWithChildren
+  '/profil/einstellungen': typeof ProfilEinstellungenRoute
+  '/profil/hinzufuegen': typeof ProfilHinzufuegenRoute
+  '/profil/outfits': typeof ProfilOutfitsRoute
+  '/profil/schrank': typeof ProfilSchrankRoute
+  '/profil/': typeof ProfilIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -93,7 +128,11 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/passwort-vergessen': typeof PasswortVergessenRoute
   '/passwort-zuruecksetzen': typeof PasswortZuruecksetzenRoute
-  '/profil': typeof ProfilRoute
+  '/profil/einstellungen': typeof ProfilEinstellungenRoute
+  '/profil/hinzufuegen': typeof ProfilHinzufuegenRoute
+  '/profil/outfits': typeof ProfilOutfitsRoute
+  '/profil/schrank': typeof ProfilSchrankRoute
+  '/profil': typeof ProfilIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -106,7 +145,12 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/passwort-vergessen': typeof PasswortVergessenRoute
   '/passwort-zuruecksetzen': typeof PasswortZuruecksetzenRoute
-  '/profil': typeof ProfilRoute
+  '/profil': typeof ProfilRouteWithChildren
+  '/profil/einstellungen': typeof ProfilEinstellungenRoute
+  '/profil/hinzufuegen': typeof ProfilHinzufuegenRoute
+  '/profil/outfits': typeof ProfilOutfitsRoute
+  '/profil/schrank': typeof ProfilSchrankRoute
+  '/profil/': typeof ProfilIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -121,6 +165,11 @@ export interface FileRouteTypes {
     | '/passwort-vergessen'
     | '/passwort-zuruecksetzen'
     | '/profil'
+    | '/profil/einstellungen'
+    | '/profil/hinzufuegen'
+    | '/profil/outfits'
+    | '/profil/schrank'
+    | '/profil/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -132,6 +181,10 @@ export interface FileRouteTypes {
     | '/login'
     | '/passwort-vergessen'
     | '/passwort-zuruecksetzen'
+    | '/profil/einstellungen'
+    | '/profil/hinzufuegen'
+    | '/profil/outfits'
+    | '/profil/schrank'
     | '/profil'
   id:
     | '__root__'
@@ -145,6 +198,11 @@ export interface FileRouteTypes {
     | '/passwort-vergessen'
     | '/passwort-zuruecksetzen'
     | '/profil'
+    | '/profil/einstellungen'
+    | '/profil/hinzufuegen'
+    | '/profil/outfits'
+    | '/profil/schrank'
+    | '/profil/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -157,7 +215,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   PasswortVergessenRoute: typeof PasswortVergessenRoute
   PasswortZuruecksetzenRoute: typeof PasswortZuruecksetzenRoute
-  ProfilRoute: typeof ProfilRoute
+  ProfilRoute: typeof ProfilRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -232,8 +290,62 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfilRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/profil/': {
+      id: '/profil/'
+      path: '/'
+      fullPath: '/profil/'
+      preLoaderRoute: typeof ProfilIndexRouteImport
+      parentRoute: typeof ProfilRoute
+    }
+    '/profil/einstellungen': {
+      id: '/profil/einstellungen'
+      path: '/einstellungen'
+      fullPath: '/profil/einstellungen'
+      preLoaderRoute: typeof ProfilEinstellungenRouteImport
+      parentRoute: typeof ProfilRoute
+    }
+    '/profil/hinzufuegen': {
+      id: '/profil/hinzufuegen'
+      path: '/hinzufuegen'
+      fullPath: '/profil/hinzufuegen'
+      preLoaderRoute: typeof ProfilHinzufuegenRouteImport
+      parentRoute: typeof ProfilRoute
+    }
+    '/profil/outfits': {
+      id: '/profil/outfits'
+      path: '/outfits'
+      fullPath: '/profil/outfits'
+      preLoaderRoute: typeof ProfilOutfitsRouteImport
+      parentRoute: typeof ProfilRoute
+    }
+    '/profil/schrank': {
+      id: '/profil/schrank'
+      path: '/schrank'
+      fullPath: '/profil/schrank'
+      preLoaderRoute: typeof ProfilSchrankRouteImport
+      parentRoute: typeof ProfilRoute
+    }
   }
 }
+
+interface ProfilRouteChildren {
+  ProfilEinstellungenRoute: typeof ProfilEinstellungenRoute
+  ProfilHinzufuegenRoute: typeof ProfilHinzufuegenRoute
+  ProfilOutfitsRoute: typeof ProfilOutfitsRoute
+  ProfilSchrankRoute: typeof ProfilSchrankRoute
+  ProfilIndexRoute: typeof ProfilIndexRoute
+}
+
+const ProfilRouteChildren: ProfilRouteChildren = {
+  ProfilEinstellungenRoute: ProfilEinstellungenRoute,
+  ProfilHinzufuegenRoute: ProfilHinzufuegenRoute,
+  ProfilOutfitsRoute: ProfilOutfitsRoute,
+  ProfilSchrankRoute: ProfilSchrankRoute,
+  ProfilIndexRoute: ProfilIndexRoute,
+}
+
+const ProfilRouteWithChildren =
+  ProfilRoute._addFileChildren(ProfilRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -245,7 +357,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   PasswortVergessenRoute: PasswortVergessenRoute,
   PasswortZuruecksetzenRoute: PasswortZuruecksetzenRoute,
-  ProfilRoute: ProfilRoute,
+  ProfilRoute: ProfilRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

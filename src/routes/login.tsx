@@ -21,7 +21,7 @@ export const Route = createFileRoute("/login")({
         ),
   beforeLoad: async () => {
     const { data } = await authClient.getSession();
-    if (data) throw redirect({ to: "/profil" });
+    if (data) throw redirect({ to: "/profil/schrank" });
   },
   component: LoginPage,
 });
