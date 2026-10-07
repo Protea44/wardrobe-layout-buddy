@@ -18,6 +18,9 @@ model User {
   updatedAt     DateTime  @updatedAt
   sessions      Session[]
   accounts      Account[]
+  items         Item[]
+  receipts      Receipt[]
+  outfits       Outfit[]
 
   @@map("user")
 }
@@ -69,4 +72,129 @@ model Verification {
 
   @@index([identifier])
   @@map("verification")
+}
+
+// --- Wardrobe data. Every row belongs to one user and is removed with them. ---
+
+enum Season {
+  fruehling
+  sommer
+  herbst
+  winter
+  ganzjaehrig
+}
+
+enum Visibility {
+  PRIVATE
+  LINK
+  PUBLIC
+}
+
+enum LifecycleStatus {
+  ACTIVE
+  SORTED_OUT
+  SOLD
+  GIVEN_AWAY
+}
+
+enum ReceiptSource {
+  UPLOAD
+  EMAIL
+}
+
+enum ParseStatus {
+  PENDING
+  PARSED
+  FAILED
+  MANUAL
+}
+
+model Item {
+  id           String    @id @default(uuid())
+  userId       String
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name         String
+  category     String
+  color        String?
+  brand        String?
+  size         String?
+  price        Decimal?  @db.Decimal(10, 2)
+  currency     String    @default("EUR")
+  purchaseDate DateTime? @db.Date
+  material     String?
+  retailer     String?
+  productUrl   String?
+  seasons      Season[]
+  notes        String?
+  // Object keys in the "item-photos" bucket: {userId}/{itemId}/{filename}
+  photoKey     String?
+  thumbnailKey String?
+  receiptId    String?
+  receipt      Receipt?  @relation(fields: [receiptId], references: [id], onDelete: SetNull)
+
+  // Not used by any feature yet; nothing is readable by others, whatever these say.
+  visibility      Visibility      @default(PRIVATE)
+  isForSale       Boolean         @default(false)
+  isTradeable     Boolean         @default(false)
+  isLinkable      Boolean         @default(false)
+  lifecycleStatus LifecycleStatus @default(ACTIVE)
+
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  outfitItems OutfitItem[]
+
+  @@index([userId])
+  @@index([userId, category])
+  @@index([userId, brand])
+  @@index([receiptId])
+  @@map("item")
+}
+
+model Receipt {
+  id           String        @id @default(uuid())
+  userId       String
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // Object key in the "receipts" bucket: {userId}/{receiptId}/{filename}
+  fileKey      String
+  source       ReceiptSource
+  merchant     String?
+  purchaseDate DateTime?     @db.Date
+  receivedAt   DateTime      @default(now())
+  parseStatus  ParseStatus   @default(PENDING)
+  createdAt    DateTime      @default(now())
+  items        Item[]
+
+  @@index([userId])
+  @@map("receipt")
+}
+
+model Outfit {
+  id        String       @id @default(uuid())
+  userId    String
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  occasion  String?
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  items     OutfitItem[]
+
+  @@index([userId])
+  @@map("outfit")
+}
+
+// Placement of one item on an outfit canvas. Owned through its outfit.
+model OutfitItem {
+  outfitId String
+  outfit   Outfit @relation(fields: [outfitId], references: [id], onDelete: Cascade)
+  itemId   String
+  item     Item   @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  // Position of the item on the canvas, relative to its size: 0 to 1.
+  x        Float
+  y        Float
+  scale    Float  @default(1)
+  zIndex   Int    @default(0)
+
+  @@id([outfitId, itemId])
+  @@index([itemId])
+  @@map("outfit_item")
 }

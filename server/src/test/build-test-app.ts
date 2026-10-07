@@ -73,3 +73,12 @@ export async function signUp(app: TestApp, email: string, password = TEST_PASSWO
   const body = response.json<{ user: { id: string } }>();
   return { userId: body.user.id, cookie: sessionCookie(response) };
 }
+
+export type TestUser = Awaited<ReturnType<typeof signUp>>;
+
+// Two separate accounts, for proving that one cannot reach the other's data.
+export async function createTwoUsers(app: TestApp) {
+  const a = await signUp(app, "user-a@example.test");
+  const b = await signUp(app, "user-b@example.test");
+  return { a, b };
+}

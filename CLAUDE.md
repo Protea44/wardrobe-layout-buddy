@@ -26,6 +26,7 @@ npm run start          # run the built backend; with NODE_ENV=production it also
 
 - Single test file: `npx vitest run src/lib/api.test.ts` (frontend), `npm run test -w server -- src/routes/health.test.ts` (backend).
 - Backend tests need the docker services. They run against `TEST_DATABASE_URL` (migrated automatically) and the local storage service under a throwaway key prefix.
+- After a schema change: `npm run db:migrate -- --name <short-name>`. Without a name Prisma asks for one and waits for input.
 - `npm run dev:web` and `npm run dev:api` start one side only.
 - Do not put NODE_ENV in `.env`: Vite reads that file and would ship a development build.
 
