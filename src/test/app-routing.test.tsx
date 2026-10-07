@@ -31,4 +31,13 @@ describe("App routing", () => {
       "/profil_/schrank/$id",
     );
   });
+
+  it("matches the outfit pages, with /neu before an id", () => {
+    const router = createRouter({ routeTree, context: { queryClient: new QueryClient() } });
+    const routeOf = (path: string) => router.matchRoutes(path, {}).at(-1)?.routeId;
+
+    expect(routeOf("/profil/outfits")).toBe("/profil_/outfits/");
+    expect(routeOf("/profil/outfits/neu")).toBe("/profil_/outfits/neu");
+    expect(routeOf("/profil/outfits/abc")).toBe("/profil_/outfits/$id");
+  });
 });

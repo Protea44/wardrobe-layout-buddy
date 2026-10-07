@@ -15,6 +15,7 @@ import { filesRoutes } from "./routes/files";
 import { healthRoutes } from "./routes/health";
 import { inboundRoutes } from "./routes/inbound";
 import { itemsRoutes } from "./routes/items";
+import { outfitsRoutes } from "./routes/outfits";
 import { receiptsRoutes } from "./routes/receipts";
 
 export type BuildAppOptions = {
@@ -45,6 +46,7 @@ export async function buildApp({ config, storage, mailer, logStream }: BuildAppO
       await api.register(authRoutes, { config });
       await api.register(filesRoutes, { config });
       await api.register(itemsRoutes, { config });
+      await api.register(outfitsRoutes);
       await api.register(receiptsRoutes, { config });
       await api.register(inboundRoutes, { config });
     },

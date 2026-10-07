@@ -2,22 +2,38 @@ import type {
   OutfitCreateInput,
   OutfitItemInput,
   OutfitResponse,
+  OutfitSaveInput,
   OutfitUpdateInput,
 } from "@shared/outfit";
 
-import type { Outfit, OutfitItem, Prisma, PrismaClient } from "../generated/prisma/client";
+import type { Item, Outfit, OutfitItem, Prisma, PrismaClient } from "../generated/prisma/client";
 import { defined, isRecordNotFound, RelatedRecordNotFoundError } from "./errors";
 
 const withItems = {
-  items: { orderBy: [{ zIndex: "asc" }, { itemId: "asc" }] },
+  items: {
+    orderBy: [{ zIndex: "asc" }, { itemId: "asc" }],
+    include: { item: { select: { name: true, thumbnailKey: true } } },
+  },
 } satisfies Prisma.OutfitInclude;
 
-function toResponse(outfit: Outfit & { items: OutfitItem[] }): OutfitResponse {
+type ItemPreview = Pick<Item, "name" | "thumbnailKey">;
+
+function toResponse(
+  outfit: Outfit & { items: (OutfitItem & { item: ItemPreview })[] },
+): OutfitResponse {
   return {
     id: outfit.id,
     name: outfit.name,
     occasion: outfit.occasion,
-    items: outfit.items.map(({ itemId, x, y, scale, zIndex }) => ({ itemId, x, y, scale, zIndex })),
+    items: outfit.items.map(({ itemId, x, y, scale, zIndex, item }) => ({
+      itemId,
+      x,
+      y,
+      scale,
+      zIndex,
+      name: item.name,
+      thumbnailKey: item.thumbnailKey,
+    })),
     createdAt: outfit.createdAt.toISOString(),
     updatedAt: outfit.updatedAt.toISOString(),
   };
@@ -25,7 +41,69 @@ function toResponse(outfit: Outfit & { items: OutfitItem[] }): OutfitResponse {
 
 // Every function is scoped to userId: other users' outfits do not exist for it.
 export function createOutfitRepository(prisma: PrismaClient) {
+  // Throws RelatedRecordNotFoundError unless every item belongs to the user.
+  async function assertOwnItems(tx: Prisma.TransactionClient, userId: string, ids: string[]) {
+    if (ids.length === 0) return;
+    const count = await tx.item.count({ where: { id: { in: ids }, userId } });
+    if (count !== new Set(ids).size) throw new RelatedRecordNotFoundError("Item");
+  }
+
+  const placements = (outfitId: string, input: OutfitSaveInput) =>
+    input.items.map(({ itemId, x, y, scale, zIndex }) => ({
+      outfitId,
+      itemId,
+      x,
+      y,
+      scale,
+      zIndex,
+    }));
+
   return {
+    // Creates the outfit with all its placements in one transaction.
+    async createWithItems(userId: string, input: OutfitSaveInput): Promise<OutfitResponse> {
+      return prisma.$transaction(async (tx) => {
+        await assertOwnItems(
+          tx,
+          userId,
+          input.items.map(({ itemId }) => itemId),
+        );
+        const outfit = await tx.outfit.create({
+          data: { name: input.name, userId, occasion: input.occasion ?? null },
+        });
+        await tx.outfitItem.createMany({ data: placements(outfit.id, input) });
+        const created = await tx.outfit.findUniqueOrThrow({
+          where: { id: outfit.id },
+          include: withItems,
+        });
+        return toResponse(created);
+      });
+    },
+
+    // Replaces name, occasion and every placement in one transaction. Null if
+    // the outfit does not exist for this user.
+    async replace(
+      userId: string,
+      id: string,
+      input: OutfitSaveInput,
+    ): Promise<OutfitResponse | null> {
+      return prisma.$transaction(async (tx) => {
+        const { count } = await tx.outfit.updateMany({
+          where: { id, userId },
+          data: { name: input.name, occasion: input.occasion ?? null },
+        });
+        if (count === 0) return null;
+        await assertOwnItems(
+          tx,
+          userId,
+          input.items.map(({ itemId }) => itemId),
+        );
+        await tx.outfitItem.deleteMany({ where: { outfitId: id } });
+        await tx.outfitItem.createMany({ data: placements(id, input) });
+        const updated = await tx.outfit.findUniqueOrThrow({ where: { id }, include: withItems });
+        return toResponse(updated);
+      });
+    },
+
     async create(userId: string, input: OutfitCreateInput): Promise<OutfitResponse> {
       const outfit = await prisma.outfit.create({
         data: { name: input.name, userId, ...defined({ occasion: input.occasion }) },

@@ -21,6 +21,9 @@ import { Route as PasswortZuruecksetzenRouteImport } from './routes/passwort-zur
 import { Route as ProfilRouteImport } from './routes/profil'
 import { Route as TeilHinzufuegenRouteImport } from './routes/teil-hinzufuegen'
 import { Route as ProfilHinzufuegenRouteImport } from './routes/profil_.hinzufuegen'
+import { Route as ProfilOutfitsIndexRouteImport } from './routes/profil_.outfits.index'
+import { Route as ProfilOutfitsIdRouteImport } from './routes/profil_.outfits.$id'
+import { Route as ProfilOutfitsNeuRouteImport } from './routes/profil_.outfits.neu'
 import { Route as ProfilSchrankIndexRouteImport } from './routes/profil_.schrank.index'
 import { Route as ProfilSchrankIdRouteImport } from './routes/profil_.schrank.$id'
 
@@ -84,6 +87,21 @@ const ProfilHinzufuegenRoute = ProfilHinzufuegenRouteImport.update({
   path: '/profil/hinzufuegen',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProfilOutfitsIndexRoute = ProfilOutfitsIndexRouteImport.update({
+  id: '/profil_/outfits/',
+  path: '/profil/outfits/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfilOutfitsIdRoute = ProfilOutfitsIdRouteImport.update({
+  id: '/profil_/outfits/$id',
+  path: '/profil/outfits/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfilOutfitsNeuRoute = ProfilOutfitsNeuRouteImport.update({
+  id: '/profil_/outfits/neu',
+  path: '/profil/outfits/neu',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProfilSchrankIndexRoute = ProfilSchrankIndexRouteImport.update({
   id: '/profil_/schrank/',
   path: '/profil/schrank/',
@@ -108,7 +126,10 @@ export interface FileRoutesByFullPath {
   '/profil': typeof ProfilRoute
   '/teil-hinzufuegen': typeof TeilHinzufuegenRoute
   '/profil/hinzufuegen': typeof ProfilHinzufuegenRoute
+  '/profil/outfits/$id': typeof ProfilOutfitsIdRoute
+  '/profil/outfits/neu': typeof ProfilOutfitsNeuRoute
   '/profil/schrank/$id': typeof ProfilSchrankIdRoute
+  '/profil/outfits/': typeof ProfilOutfitsIndexRoute
   '/profil/schrank/': typeof ProfilSchrankIndexRoute
 }
 export interface FileRoutesByTo {
@@ -124,7 +145,10 @@ export interface FileRoutesByTo {
   '/profil': typeof ProfilRoute
   '/teil-hinzufuegen': typeof TeilHinzufuegenRoute
   '/profil/hinzufuegen': typeof ProfilHinzufuegenRoute
+  '/profil/outfits/$id': typeof ProfilOutfitsIdRoute
+  '/profil/outfits/neu': typeof ProfilOutfitsNeuRoute
   '/profil/schrank/$id': typeof ProfilSchrankIdRoute
+  '/profil/outfits': typeof ProfilOutfitsIndexRoute
   '/profil/schrank': typeof ProfilSchrankIndexRoute
 }
 export interface FileRoutesById {
@@ -141,7 +165,10 @@ export interface FileRoutesById {
   '/profil': typeof ProfilRoute
   '/teil-hinzufuegen': typeof TeilHinzufuegenRoute
   '/profil_/hinzufuegen': typeof ProfilHinzufuegenRoute
+  '/profil_/outfits/$id': typeof ProfilOutfitsIdRoute
+  '/profil_/outfits/neu': typeof ProfilOutfitsNeuRoute
   '/profil_/schrank/$id': typeof ProfilSchrankIdRoute
+  '/profil_/outfits/': typeof ProfilOutfitsIndexRoute
   '/profil_/schrank/': typeof ProfilSchrankIndexRoute
 }
 export interface FileRouteTypes {
@@ -159,7 +186,10 @@ export interface FileRouteTypes {
     | '/profil'
     | '/teil-hinzufuegen'
     | '/profil/hinzufuegen'
+    | '/profil/outfits/$id'
+    | '/profil/outfits/neu'
     | '/profil/schrank/$id'
+    | '/profil/outfits/'
     | '/profil/schrank/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -175,7 +205,10 @@ export interface FileRouteTypes {
     | '/profil'
     | '/teil-hinzufuegen'
     | '/profil/hinzufuegen'
+    | '/profil/outfits/$id'
+    | '/profil/outfits/neu'
     | '/profil/schrank/$id'
+    | '/profil/outfits'
     | '/profil/schrank'
   id:
     | '__root__'
@@ -191,7 +224,10 @@ export interface FileRouteTypes {
     | '/profil'
     | '/teil-hinzufuegen'
     | '/profil_/hinzufuegen'
+    | '/profil_/outfits/$id'
+    | '/profil_/outfits/neu'
     | '/profil_/schrank/$id'
+    | '/profil_/outfits/'
     | '/profil_/schrank/'
   fileRoutesById: FileRoutesById
 }
@@ -208,7 +244,10 @@ export interface RootRouteChildren {
   ProfilRoute: typeof ProfilRoute
   TeilHinzufuegenRoute: typeof TeilHinzufuegenRoute
   ProfilHinzufuegenRoute: typeof ProfilHinzufuegenRoute
+  ProfilOutfitsIdRoute: typeof ProfilOutfitsIdRoute
+  ProfilOutfitsNeuRoute: typeof ProfilOutfitsNeuRoute
   ProfilSchrankIdRoute: typeof ProfilSchrankIdRoute
+  ProfilOutfitsIndexRoute: typeof ProfilOutfitsIndexRoute
   ProfilSchrankIndexRoute: typeof ProfilSchrankIndexRoute
 }
 
@@ -298,6 +337,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfilHinzufuegenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/profil_/outfits/': {
+      id: '/profil_/outfits/'
+      path: '/profil/outfits'
+      fullPath: '/profil/outfits/'
+      preLoaderRoute: typeof ProfilOutfitsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profil_/outfits/$id': {
+      id: '/profil_/outfits/$id'
+      path: '/profil/outfits/$id'
+      fullPath: '/profil/outfits/$id'
+      preLoaderRoute: typeof ProfilOutfitsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profil_/outfits/neu': {
+      id: '/profil_/outfits/neu'
+      path: '/profil/outfits/neu'
+      fullPath: '/profil/outfits/neu'
+      preLoaderRoute: typeof ProfilOutfitsNeuRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/profil_/schrank/': {
       id: '/profil_/schrank/'
       path: '/profil/schrank'
@@ -328,7 +388,10 @@ const rootRouteChildren: RootRouteChildren = {
   ProfilRoute: ProfilRoute,
   TeilHinzufuegenRoute: TeilHinzufuegenRoute,
   ProfilHinzufuegenRoute: ProfilHinzufuegenRoute,
+  ProfilOutfitsIdRoute: ProfilOutfitsIdRoute,
+  ProfilOutfitsNeuRoute: ProfilOutfitsNeuRoute,
   ProfilSchrankIdRoute: ProfilSchrankIdRoute,
+  ProfilOutfitsIndexRoute: ProfilOutfitsIndexRoute,
   ProfilSchrankIndexRoute: ProfilSchrankIndexRoute,
 }
 export const routeTree = rootRouteImport

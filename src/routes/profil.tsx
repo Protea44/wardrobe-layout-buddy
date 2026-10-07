@@ -49,6 +49,9 @@ function ProfilePage() {
         <Link to="/profil/schrank">Mein Schrank</Link>
       </Button>
       <Button asChild variant="outline" className="profile-add-item h-11 px-6">
+        <Link to="/profil/outfits">Meine Outfits</Link>
+      </Button>
+      <Button asChild variant="outline" className="profile-add-item h-11 px-6">
         <Link to="/profil/hinzufuegen">Teil hinzufügen</Link>
       </Button>
       <Button
