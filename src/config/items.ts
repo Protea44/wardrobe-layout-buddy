@@ -7,6 +7,3 @@ export const seasonLabels: Record<Season, string> = {
   winter: "Winter",
   ganzjaehrig: "Ganzjährig",
 };
-
-// The wardrobe overview does not exist yet; the profile stands in for it.
-export const WARDROBE_PATH = "/profil";

@@ -22,4 +22,13 @@ describe("App routing", () => {
 
     expect(matches.at(-1)?.routeId).toBe("/profil_/hinzufuegen");
   });
+
+  it("matches the wardrobe and an item page", () => {
+    const router = createRouter({ routeTree, context: { queryClient: new QueryClient() } });
+
+    expect(router.matchRoutes("/profil/schrank", {}).at(-1)?.routeId).toBe("/profil_/schrank/");
+    expect(router.matchRoutes("/profil/schrank/abc", {}).at(-1)?.routeId).toBe(
+      "/profil_/schrank/$id",
+    );
+  });
 });

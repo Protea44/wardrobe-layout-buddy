@@ -1,4 +1,13 @@
-import type { ItemCreateInput, ItemResponse, ItemUpdateInput, LifecycleStatus } from "@shared/item";
+import {
+  seasonSchema,
+  type ItemCreateInput,
+  type ItemFacets,
+  type ItemListQuery,
+  type ItemListResponse,
+  type ItemResponse,
+  type ItemUpdateInput,
+  type LifecycleStatus,
+} from "@shared/item";
 import type { ReceiptItemInput, ReceiptUpdateInput } from "@shared/receipt";
 
 import type { Item, PrismaClient } from "../generated/prisma/client";
@@ -11,6 +20,7 @@ import {
   RelatedRecordNotFoundError,
   toDateOnly,
 } from "./errors";
+import { afterCursor, encodeCursor, filterWhere, orderBy } from "./item-search";
 
 function toResponse(item: Item): ItemResponse {
   return {
@@ -172,6 +182,52 @@ export function createItemRepository(prisma: PrismaClient) {
         orderBy: [{ createdAt: "desc" }, { id: "asc" }],
       });
       return items.map(toResponse);
+    },
+
+    // One page of the user's active items for GET /api/items. Throws
+    // InvalidCursorError for a cursor this function did not produce.
+    async search(userId: string, query: ItemListQuery): Promise<ItemListResponse> {
+      const where = filterWhere(userId, query);
+      const pageWhere =
+        query.cursor === undefined
+          ? where
+          : { AND: [where, afterCursor(query.cursor, query.sort)] };
+
+      const [rows, total] = await Promise.all([
+        // One extra row tells whether another page follows.
+        prisma.item.findMany({
+          where: pageWhere,
+          orderBy: orderBy(query.sort),
+          take: query.limit + 1,
+        }),
+        prisma.item.count({ where }),
+      ]);
+      const page = rows.slice(0, query.limit);
+      const last = page.at(-1);
+      return {
+        items: page.map(toResponse),
+        total,
+        nextCursor: rows.length > query.limit && last ? encodeCursor(last, query.sort) : null,
+      };
+    },
+
+    // Distinct filter values among the user's active items.
+    async facets(userId: string): Promise<ItemFacets> {
+      const rows = await prisma.item.findMany({
+        where: { userId, lifecycleStatus: "ACTIVE" },
+        select: { category: true, color: true, brand: true, seasons: true },
+      });
+      const distinct = (values: (string | null)[]) =>
+        [...new Set(values.filter((value): value is string => value !== null))].sort((a, b) =>
+          a.localeCompare(b, "de"),
+        );
+      const seasons = new Set(rows.flatMap((row) => row.seasons));
+      return {
+        categories: distinct(rows.map((row) => row.category)),
+        colors: distinct(rows.map((row) => row.color)),
+        brands: distinct(rows.map((row) => row.brand)),
+        seasons: seasonSchema.options.filter((season) => seasons.has(season)),
+      };
     },
 
     // Null if the item does not exist for this user.

@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import type { ItemResponse } from "@shared/item";
 
 import { Button } from "@/components/ui/button";
-import { WARDROBE_PATH } from "@/config/items";
+import { WARDROBE_PATH } from "@/config/wardrobe";
 import { itemPhotoUrl } from "@/lib/items-api";
 
 type ItemSavedProps = {

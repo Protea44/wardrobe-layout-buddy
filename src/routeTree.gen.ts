@@ -21,6 +21,8 @@ import { Route as PasswortZuruecksetzenRouteImport } from './routes/passwort-zur
 import { Route as ProfilRouteImport } from './routes/profil'
 import { Route as TeilHinzufuegenRouteImport } from './routes/teil-hinzufuegen'
 import { Route as ProfilHinzufuegenRouteImport } from './routes/profil_.hinzufuegen'
+import { Route as ProfilSchrankIndexRouteImport } from './routes/profil_.schrank.index'
+import { Route as ProfilSchrankIdRouteImport } from './routes/profil_.schrank.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -82,6 +84,16 @@ const ProfilHinzufuegenRoute = ProfilHinzufuegenRouteImport.update({
   path: '/profil/hinzufuegen',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProfilSchrankIndexRoute = ProfilSchrankIndexRouteImport.update({
+  id: '/profil_/schrank/',
+  path: '/profil/schrank/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfilSchrankIdRoute = ProfilSchrankIdRouteImport.update({
+  id: '/profil_/schrank/$id',
+  path: '/profil/schrank/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -96,6 +108,8 @@ export interface FileRoutesByFullPath {
   '/profil': typeof ProfilRoute
   '/teil-hinzufuegen': typeof TeilHinzufuegenRoute
   '/profil/hinzufuegen': typeof ProfilHinzufuegenRoute
+  '/profil/schrank/$id': typeof ProfilSchrankIdRoute
+  '/profil/schrank/': typeof ProfilSchrankIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -110,6 +124,8 @@ export interface FileRoutesByTo {
   '/profil': typeof ProfilRoute
   '/teil-hinzufuegen': typeof TeilHinzufuegenRoute
   '/profil/hinzufuegen': typeof ProfilHinzufuegenRoute
+  '/profil/schrank/$id': typeof ProfilSchrankIdRoute
+  '/profil/schrank': typeof ProfilSchrankIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -125,6 +141,8 @@ export interface FileRoutesById {
   '/profil': typeof ProfilRoute
   '/teil-hinzufuegen': typeof TeilHinzufuegenRoute
   '/profil_/hinzufuegen': typeof ProfilHinzufuegenRoute
+  '/profil_/schrank/$id': typeof ProfilSchrankIdRoute
+  '/profil_/schrank/': typeof ProfilSchrankIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -141,6 +159,8 @@ export interface FileRouteTypes {
     | '/profil'
     | '/teil-hinzufuegen'
     | '/profil/hinzufuegen'
+    | '/profil/schrank/$id'
+    | '/profil/schrank/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -155,6 +175,8 @@ export interface FileRouteTypes {
     | '/profil'
     | '/teil-hinzufuegen'
     | '/profil/hinzufuegen'
+    | '/profil/schrank/$id'
+    | '/profil/schrank'
   id:
     | '__root__'
     | '/'
@@ -169,6 +191,8 @@ export interface FileRouteTypes {
     | '/profil'
     | '/teil-hinzufuegen'
     | '/profil_/hinzufuegen'
+    | '/profil_/schrank/$id'
+    | '/profil_/schrank/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -184,6 +208,8 @@ export interface RootRouteChildren {
   ProfilRoute: typeof ProfilRoute
   TeilHinzufuegenRoute: typeof TeilHinzufuegenRoute
   ProfilHinzufuegenRoute: typeof ProfilHinzufuegenRoute
+  ProfilSchrankIdRoute: typeof ProfilSchrankIdRoute
+  ProfilSchrankIndexRoute: typeof ProfilSchrankIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -272,6 +298,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfilHinzufuegenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/profil_/schrank/': {
+      id: '/profil_/schrank/'
+      path: '/profil/schrank'
+      fullPath: '/profil/schrank/'
+      preLoaderRoute: typeof ProfilSchrankIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profil_/schrank/$id': {
+      id: '/profil_/schrank/$id'
+      path: '/profil/schrank/$id'
+      fullPath: '/profil/schrank/$id'
+      preLoaderRoute: typeof ProfilSchrankIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -288,6 +328,8 @@ const rootRouteChildren: RootRouteChildren = {
   ProfilRoute: ProfilRoute,
   TeilHinzufuegenRoute: TeilHinzufuegenRoute,
   ProfilHinzufuegenRoute: ProfilHinzufuegenRoute,
+  ProfilSchrankIdRoute: ProfilSchrankIdRoute,
+  ProfilSchrankIndexRoute: ProfilSchrankIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

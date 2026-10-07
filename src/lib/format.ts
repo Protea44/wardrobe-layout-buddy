@@ -10,3 +10,10 @@ export function formatDate(value: string) {
     ...(dateOnly && { timeZone: "UTC" }),
   }).format(date);
 }
+
+const priceFormat = new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" });
+
+// "1234.5" as "1.234,50 €".
+export function formatPrice(value: string) {
+  return priceFormat.format(Number(value));
+}

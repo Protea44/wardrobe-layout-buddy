@@ -128,6 +128,49 @@ export const itemResponseSchema = z.object({
   updatedAt: timestampSchema,
 });
 
+export const itemSortSchema = z.enum(["newest", "purchaseDate", "priceAsc", "priceDesc"]);
+
+export const ITEM_PAGE_SIZE = 60;
+export const ITEM_PAGE_MAX = 100;
+
+// An empty query parameter means "not set".
+const filterValue = (max: number) =>
+  z
+    .string()
+    .trim()
+    .max(max)
+    .optional()
+    .transform((value) => (value === "" ? undefined : value));
+
+// Query parameters of GET /api/items. Only active items are listed.
+export const itemListQuerySchema = z.object({
+  // Searched case-insensitively in name, brand, material and notes.
+  q: filterValue(100),
+  category: filterValue(60),
+  color: filterValue(60),
+  brand: filterValue(80),
+  season: seasonSchema.optional(),
+  sort: itemSortSchema.default("newest"),
+  // Opaque; taken from nextCursor of the previous page.
+  cursor: z.string().min(1).max(500).optional(),
+  limit: z.coerce.number().int().min(1).max(ITEM_PAGE_MAX).default(ITEM_PAGE_SIZE),
+});
+
+export const itemListResponseSchema = z.object({
+  items: z.array(itemResponseSchema),
+  // All items matching the filters, across every page.
+  total: z.number().int().nonnegative(),
+  nextCursor: z.string().nullable(),
+});
+
+// GET /api/items/facets: the values the user's active items actually have.
+export const itemFacetsSchema = z.object({
+  categories: z.array(z.string()),
+  colors: z.array(z.string()),
+  brands: z.array(z.string()),
+  seasons: z.array(seasonSchema),
+});
+
 export type Season = z.infer<typeof seasonSchema>;
 export type Visibility = z.infer<typeof visibilitySchema>;
 export type LifecycleStatus = z.infer<typeof lifecycleStatusSchema>;
@@ -137,3 +180,7 @@ export type ItemUploadInput = z.infer<typeof itemUploadSchema>;
 export type ItemCreateInput = z.infer<typeof itemCreateSchema>;
 export type ItemUpdateInput = z.infer<typeof itemUpdateSchema>;
 export type ItemResponse = z.infer<typeof itemResponseSchema>;
+export type ItemSort = z.infer<typeof itemSortSchema>;
+export type ItemListQuery = z.infer<typeof itemListQuerySchema>;
+export type ItemListResponse = z.infer<typeof itemListResponseSchema>;
+export type ItemFacets = z.infer<typeof itemFacetsSchema>;

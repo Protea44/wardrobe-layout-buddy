@@ -1,7 +1,9 @@
 import multipart from "@fastify/multipart";
 import type { FastifyPluginAsync } from "fastify";
+import { z } from "zod";
 
-import { ITEM_PHOTO_MAX_BYTES, itemUploadSchema } from "@shared/item";
+import { idSchema } from "@shared/common";
+import { ITEM_PHOTO_MAX_BYTES, itemListQuerySchema, itemUploadSchema } from "@shared/item";
 
 import type { AppConfig } from "../config";
 import { detectImageType } from "../lib/file-type";
@@ -14,6 +16,9 @@ import {
 import { parseJsonField, readMultipart } from "../lib/multipart";
 import { newRecordId, storageKey } from "../lib/storage-keys";
 import { RelatedRecordNotFoundError } from "../repositories/errors";
+import { InvalidCursorError } from "../repositories/item-search";
+
+const itemParamsSchema = z.object({ id: idSchema });
 
 type ItemsOptions = {
   config: Pick<AppConfig, "S3_BUCKET_ITEM_PHOTOS">;
@@ -25,6 +30,33 @@ export const itemsRoutes: FastifyPluginAsync<ItemsOptions> = async (app, { confi
   // Encapsulated: only these routes accept multipart bodies.
   await app.register(multipart, {
     limits: { fileSize: ITEM_PHOTO_MAX_BYTES, files: 2, fields: 1, parts: 3, fieldSize: 64 * 1024 },
+  });
+
+  // One page of the user's active items, filtered, searched and sorted.
+  app.get("/items", async (request, reply) => {
+    if (request.userId === null) return sendUnauthorized(reply);
+    const query = itemListQuerySchema.safeParse(request.query);
+    if (!query.success) return sendBadRequest(reply, "Invalid list parameters");
+
+    try {
+      return await app.repositories.items.search(request.userId, query.data);
+    } catch (error) {
+      if (error instanceof InvalidCursorError) return sendBadRequest(reply, "Invalid cursor");
+      throw error;
+    }
+  });
+
+  app.get("/items/facets", async (request, reply) => {
+    if (request.userId === null) return sendUnauthorized(reply);
+    return app.repositories.items.facets(request.userId);
+  });
+
+  app.get("/items/:id", async (request, reply) => {
+    if (request.userId === null) return sendUnauthorized(reply);
+    const params = itemParamsSchema.safeParse(request.params);
+    if (!params.success) return sendNotFound(reply);
+    const item = await app.repositories.items.get(request.userId, params.data.id);
+    return item ?? sendNotFound(reply);
   });
 
   // multipart/form-data with the files "photo" and "thumbnail" and the field
