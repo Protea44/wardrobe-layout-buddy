@@ -168,6 +168,19 @@
   .legal-address { font-style: normal; }
   .legal-revision { margin-top: 56px; font-size: 14px; color: var(--muted-foreground); }
 
+  .auth-page { max-width: 480px; }
+  .auth-intro { margin-top: 20px; font-size: 16px; line-height: 1.7; color: var(--muted-foreground); }
+  .auth-form { display: grid; gap: 22px; margin-top: 36px; }
+  .auth-message { margin-top: 28px; padding: 12px 16px; background: var(--surface); border: 1px solid var(--gold); border-radius: var(--radius); font-size: 15px; line-height: 1.6; }
+  .auth-form .auth-message { margin-top: 0; }
+  .auth-links { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px 24px; margin-top: 4px; font-size: 15px; }
+  .auth-page > .auth-links { margin-top: 28px; }
+  .auth-links a { text-decoration: underline; text-decoration-color: var(--gold); text-underline-offset: 5px; }
+  .profile-details { display: grid; grid-template-columns: max-content 1fr; gap: 12px 32px; margin-top: 40px; font-size: 16px; line-height: 1.6; }
+  .profile-details dt { color: var(--muted-foreground); }
+  .profile-details dd { overflow-wrap: anywhere; }
+  .profile-sign-out { margin-top: 40px; }
+
   .coming-soon { display: flex; flex-direction: column; align-items: center; text-align: center; }
   .coming-soon-text { margin-top: 24px; max-width: 520px; font-size: 18px; line-height: 1.7; color: var(--muted-foreground); }
   .gold-divider { width: 96px; margin-block: 40px; border: 0; border-top: 1px solid var(--gold); }

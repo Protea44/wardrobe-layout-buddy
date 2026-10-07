@@ -3,12 +3,14 @@ import Fastify from "fastify";
 import type { AppConfig } from "./config";
 import { loadFrontend } from "./lib/frontend";
 import { loggerOptions } from "./lib/logger";
+import { createMailer, type Mailer } from "./lib/mailer";
 import { createStorage, type Storage } from "./lib/storage";
-import { authPlugin, type ResolveUserId } from "./plugins/auth";
+import { authPlugin } from "./plugins/auth";
 import { frontendPlugin } from "./plugins/frontend";
 import { prismaPlugin } from "./plugins/prisma";
 import { securityPlugin } from "./plugins/security";
 import { storagePlugin } from "./plugins/storage";
+import { authRoutes } from "./routes/auth";
 import { filesRoutes } from "./routes/files";
 import { healthRoutes } from "./routes/health";
 
@@ -16,11 +18,11 @@ export type BuildAppOptions = {
   config: AppConfig;
   // Overrides for tests.
   storage?: Storage;
-  resolveUserId?: ResolveUserId;
+  mailer?: Mailer;
   logStream?: NodeJS.WritableStream;
 };
 
-export async function buildApp({ config, storage, resolveUserId, logStream }: BuildAppOptions) {
+export async function buildApp({ config, storage, mailer, logStream }: BuildAppOptions) {
   const app = Fastify({
     logger: loggerOptions(config, logStream),
     bodyLimit: config.BODY_LIMIT_BYTES,
@@ -32,11 +34,12 @@ export async function buildApp({ config, storage, resolveUserId, logStream }: Bu
   await app.register(securityPlugin, { config });
   await app.register(prismaPlugin, { databaseUrl: config.DATABASE_URL });
   await app.register(storagePlugin, { storage: storage ?? createStorage(config) });
-  await app.register(authPlugin, resolveUserId ? { resolveUserId } : {});
+  await app.register(authPlugin, { config, mailer: mailer ?? createMailer(config) });
 
   await app.register(
     async (api) => {
       await api.register(healthRoutes);
+      await api.register(authRoutes, { config });
       await api.register(filesRoutes, { config });
     },
     { prefix: "/api" },

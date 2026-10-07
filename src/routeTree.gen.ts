@@ -16,6 +16,8 @@ import { Route as DatenschutzRouteImport } from './routes/datenschutz'
 import { Route as ImpressumRouteImport } from './routes/impressum'
 import { Route as KaufenRouteImport } from './routes/kaufen'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as PasswortVergessenRouteImport } from './routes/passwort-vergessen'
+import { Route as PasswortZuruecksetzenRouteImport } from './routes/passwort-zuruecksetzen'
 import { Route as ProfilRouteImport } from './routes/profil'
 
 const IndexRoute = IndexRouteImport.update({
@@ -53,6 +55,16 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PasswortVergessenRoute = PasswortVergessenRouteImport.update({
+  id: '/passwort-vergessen',
+  path: '/passwort-vergessen',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PasswortZuruecksetzenRoute = PasswortZuruecksetzenRouteImport.update({
+  id: '/passwort-zuruecksetzen',
+  path: '/passwort-zuruecksetzen',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProfilRoute = ProfilRouteImport.update({
   id: '/profil',
   path: '/profil',
@@ -67,6 +79,8 @@ export interface FileRoutesByFullPath {
   '/impressum': typeof ImpressumRoute
   '/kaufen': typeof KaufenRoute
   '/login': typeof LoginRoute
+  '/passwort-vergessen': typeof PasswortVergessenRoute
+  '/passwort-zuruecksetzen': typeof PasswortZuruecksetzenRoute
   '/profil': typeof ProfilRoute
 }
 export interface FileRoutesByTo {
@@ -77,6 +91,8 @@ export interface FileRoutesByTo {
   '/impressum': typeof ImpressumRoute
   '/kaufen': typeof KaufenRoute
   '/login': typeof LoginRoute
+  '/passwort-vergessen': typeof PasswortVergessenRoute
+  '/passwort-zuruecksetzen': typeof PasswortZuruecksetzenRoute
   '/profil': typeof ProfilRoute
 }
 export interface FileRoutesById {
@@ -88,6 +104,8 @@ export interface FileRoutesById {
   '/impressum': typeof ImpressumRoute
   '/kaufen': typeof KaufenRoute
   '/login': typeof LoginRoute
+  '/passwort-vergessen': typeof PasswortVergessenRoute
+  '/passwort-zuruecksetzen': typeof PasswortZuruecksetzenRoute
   '/profil': typeof ProfilRoute
 }
 export interface FileRouteTypes {
@@ -100,6 +118,8 @@ export interface FileRouteTypes {
     | '/impressum'
     | '/kaufen'
     | '/login'
+    | '/passwort-vergessen'
+    | '/passwort-zuruecksetzen'
     | '/profil'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -110,6 +130,8 @@ export interface FileRouteTypes {
     | '/impressum'
     | '/kaufen'
     | '/login'
+    | '/passwort-vergessen'
+    | '/passwort-zuruecksetzen'
     | '/profil'
   id:
     | '__root__'
@@ -120,6 +142,8 @@ export interface FileRouteTypes {
     | '/impressum'
     | '/kaufen'
     | '/login'
+    | '/passwort-vergessen'
+    | '/passwort-zuruecksetzen'
     | '/profil'
   fileRoutesById: FileRoutesById
 }
@@ -131,6 +155,8 @@ export interface RootRouteChildren {
   ImpressumRoute: typeof ImpressumRoute
   KaufenRoute: typeof KaufenRoute
   LoginRoute: typeof LoginRoute
+  PasswortVergessenRoute: typeof PasswortVergessenRoute
+  PasswortZuruecksetzenRoute: typeof PasswortZuruecksetzenRoute
   ProfilRoute: typeof ProfilRoute
 }
 
@@ -185,6 +211,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/passwort-vergessen': {
+      id: '/passwort-vergessen'
+      path: '/passwort-vergessen'
+      fullPath: '/passwort-vergessen'
+      preLoaderRoute: typeof PasswortVergessenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/passwort-zuruecksetzen': {
+      id: '/passwort-zuruecksetzen'
+      path: '/passwort-zuruecksetzen'
+      fullPath: '/passwort-zuruecksetzen'
+      preLoaderRoute: typeof PasswortZuruecksetzenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/profil': {
       id: '/profil'
       path: '/profil'
@@ -203,6 +243,8 @@ const rootRouteChildren: RootRouteChildren = {
   ImpressumRoute: ImpressumRoute,
   KaufenRoute: KaufenRoute,
   LoginRoute: LoginRoute,
+  PasswortVergessenRoute: PasswortVergessenRoute,
+  PasswortZuruecksetzenRoute: PasswortZuruecksetzenRoute,
   ProfilRoute: ProfilRoute,
 }
 export const routeTree = rootRouteImport

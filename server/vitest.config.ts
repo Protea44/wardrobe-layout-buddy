@@ -23,10 +23,14 @@ export default defineConfig({
     environment: "node",
     include: ["src/**/*.test.ts"],
     globalSetup: ["./src/test/global-setup.ts"],
+    // All files share one test database.
+    fileParallelism: false,
     env: {
       NODE_ENV: "test",
       DATABASE_URL: testDatabaseUrl,
       LOG_LEVEL: "silent",
+      // Every test request comes from the same address.
+      AUTH_RATE_LIMIT_MAX: "1000",
     },
   },
 });

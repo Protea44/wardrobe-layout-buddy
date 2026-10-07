@@ -1,23 +1,32 @@
 import { Readable } from "node:stream";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import type { Storage } from "../lib/storage";
-import { buildTestApp } from "../test/build-test-app";
+import {
+  browserHeaders,
+  buildTestApp,
+  resetDatabase,
+  signUp,
+  type TestApp,
+} from "../test/build-test-app";
 import { isOwnedKey } from "./files";
 
-const OWNER = "user-a";
-const OTHER = "user-b";
-
-// One stored photo that belongs to OWNER.
-function fakeStorage() {
+describe("GET /api/files/:bucket/*", () => {
+  let app: TestApp;
+  let owner: { userId: string; cookie: string };
+  let other: { userId: string; cookie: string };
   const requested: string[] = [];
+
+  // One stored photo that belongs to the owner.
   const storage: Storage = {
     putObject: () => Promise.resolve(),
     deleteObject: () => Promise.resolve(),
     deletePrefix: () => Promise.resolve(),
     getObjectStream: (bucket, key) => {
       requested.push(`${bucket}/${key}`);
-      if (bucket !== "item-photos" || key !== `${OWNER}/photo.jpg`) return Promise.resolve(null);
+      if (bucket !== "item-photos" || key !== `${owner.userId}/photo.jpg`) {
+        return Promise.resolve(null);
+      }
       return Promise.resolve({
         stream: Readable.from([Buffer.from("jpeg-bytes")]),
         contentType: "image/jpeg",
@@ -25,47 +34,39 @@ function fakeStorage() {
       });
     },
   };
-  return { storage, requested };
-}
 
-describe("GET /api/files/:bucket/*", () => {
-  let app: Awaited<ReturnType<typeof buildTestApp>> | undefined;
-
-  afterEach(async () => {
-    await app?.close();
-    app = undefined;
+  beforeAll(async () => {
+    app = await buildTestApp({ storage });
+    await resetDatabase(app);
+    owner = await signUp(app, "owner@example.test");
+    other = await signUp(app, "other@example.test");
   });
+  afterAll(() => app.close());
 
-  async function request(url: string, userId: string | null) {
-    const { storage, requested } = fakeStorage();
-    app = await buildTestApp({ storage, resolveUserId: () => userId });
-    const response = await app.inject({ method: "GET", url });
-    return { response, requested };
+  function get(url: string, cookie?: string) {
+    requested.length = 0;
+    return app.inject({ method: "GET", url, headers: browserHeaders(app, cookie) });
   }
 
-  it("requires a logged-in user", async () => {
-    const { response, requested } = await request(
-      `/api/files/item-photos/${OWNER}/photo.jpg`,
-      null,
+  it("requires a session", async () => {
+    const response = await get(`/api/files/item-photos/${owner.userId}/photo.jpg`);
+
+    expect(response.statusCode).toBe(401);
+    expect(requested).toEqual([]);
+  });
+
+  it("treats an invalid session cookie as no session", async () => {
+    const response = await get(
+      `/api/files/item-photos/${owner.userId}/photo.jpg`,
+      "kk.session_token=forged.value",
     );
 
     expect(response.statusCode).toBe(401);
     expect(requested).toEqual([]);
   });
 
-  it("rejects every request while no authentication is wired in", async () => {
-    app = await buildTestApp({ storage: fakeStorage().storage });
-
-    const response = await app.inject({
-      method: "GET",
-      url: `/api/files/item-photos/${OWNER}/photo.jpg`,
-    });
-
-    expect(response.statusCode).toBe(401);
-  });
-
   it("streams the owner's file with a private cache header", async () => {
-    const { response } = await request(`/api/files/item-photos/${OWNER}/photo.jpg`, OWNER);
+    const response = await get(`/api/files/item-photos/${owner.userId}/photo.jpg`, owner.cookie);
 
     expect(response.statusCode).toBe(200);
     expect(response.body).toBe("jpeg-bytes");
@@ -75,10 +76,7 @@ describe("GET /api/files/:bucket/*", () => {
   });
 
   it("answers 404 for another user's file without touching storage", async () => {
-    const { response, requested } = await request(
-      `/api/files/item-photos/${OWNER}/photo.jpg`,
-      OTHER,
-    );
+    const response = await get(`/api/files/item-photos/${owner.userId}/photo.jpg`, other.cookie);
 
     expect(response.statusCode).toBe(404);
     expect(requested).toEqual([]);
@@ -86,13 +84,12 @@ describe("GET /api/files/:bucket/*", () => {
 
   it("answers 404 for a missing file, an unknown bucket and path traversal", async () => {
     for (const url of [
-      `/api/files/item-photos/${OWNER}/missing.jpg`,
-      `/api/files/other-bucket/${OWNER}/photo.jpg`,
-      `/api/files/item-photos/${OWNER}/%2E%2E/${OTHER}/photo.jpg`,
+      `/api/files/item-photos/${owner.userId}/missing.jpg`,
+      `/api/files/other-bucket/${owner.userId}/photo.jpg`,
+      `/api/files/item-photos/${other.userId}/%2E%2E/${owner.userId}/photo.jpg`,
     ]) {
-      const { response } = await request(url, OWNER);
+      const response = await get(url, other.cookie);
       expect(response.statusCode, url).toBe(404);
-      await app?.close();
     }
   });
 });

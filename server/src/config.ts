@@ -15,10 +15,21 @@ const configSchema = z.object({
   LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"]).default("info"),
   TRUST_PROXY: booleanString.default("false"),
   RATE_LIMIT_MAX: z.coerce.number().int().positive().default(300),
+  AUTH_RATE_LIMIT_MAX: z.coerce.number().int().positive().default(20),
   BODY_LIMIT_BYTES: z.coerce.number().int().positive().default(1_048_576),
   FRONTEND_DIR: z.string().min(1).default(path.join(repoRoot, "dist")),
 
   DATABASE_URL: z.string().url(),
+
+  // Origin only, e.g. https://example.de: paths are appended to it.
+  APP_URL: z
+    .string()
+    .url()
+    .refine(
+      (value) => new URL(value).origin === value,
+      "must be an origin without path or trailing slash",
+    ),
+  BETTER_AUTH_SECRET: z.string().min(32),
 
   S3_ENDPOINT: z.string().url(),
   S3_REGION: z.string().min(1).default("eu-central-1"),
@@ -30,6 +41,8 @@ const configSchema = z.object({
 
   SMTP_HOST: z.string().min(1),
   SMTP_PORT: z.coerce.number().int().min(1).max(65535),
+  SMTP_USER: z.string().min(1).optional(),
+  SMTP_PASSWORD: z.string().min(1).optional(),
   MAIL_FROM: z.string().min(1),
 });
 
