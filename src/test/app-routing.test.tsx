@@ -40,4 +40,12 @@ describe("App routing", () => {
     expect(routeOf("/profil/outfits/neu")).toBe("/profil_/outfits/neu");
     expect(routeOf("/profil/outfits/abc")).toBe("/profil_/outfits/$id");
   });
+
+  it("matches the settings page", () => {
+    const router = createRouter({ routeTree, context: { queryClient: new QueryClient() } });
+
+    expect(router.matchRoutes("/profil/einstellungen", {}).at(-1)?.routeId).toBe(
+      "/profil_/einstellungen",
+    );
+  });
 });

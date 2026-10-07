@@ -20,6 +20,7 @@ import { Route as PasswortVergessenRouteImport } from './routes/passwort-vergess
 import { Route as PasswortZuruecksetzenRouteImport } from './routes/passwort-zuruecksetzen'
 import { Route as ProfilRouteImport } from './routes/profil'
 import { Route as TeilHinzufuegenRouteImport } from './routes/teil-hinzufuegen'
+import { Route as ProfilEinstellungenRouteImport } from './routes/profil_.einstellungen'
 import { Route as ProfilHinzufuegenRouteImport } from './routes/profil_.hinzufuegen'
 import { Route as ProfilOutfitsIndexRouteImport } from './routes/profil_.outfits.index'
 import { Route as ProfilOutfitsIdRouteImport } from './routes/profil_.outfits.$id'
@@ -82,6 +83,11 @@ const TeilHinzufuegenRoute = TeilHinzufuegenRouteImport.update({
   path: '/teil-hinzufuegen',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProfilEinstellungenRoute = ProfilEinstellungenRouteImport.update({
+  id: '/profil_/einstellungen',
+  path: '/profil/einstellungen',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProfilHinzufuegenRoute = ProfilHinzufuegenRouteImport.update({
   id: '/profil_/hinzufuegen',
   path: '/profil/hinzufuegen',
@@ -125,6 +131,7 @@ export interface FileRoutesByFullPath {
   '/passwort-zuruecksetzen': typeof PasswortZuruecksetzenRoute
   '/profil': typeof ProfilRoute
   '/teil-hinzufuegen': typeof TeilHinzufuegenRoute
+  '/profil/einstellungen': typeof ProfilEinstellungenRoute
   '/profil/hinzufuegen': typeof ProfilHinzufuegenRoute
   '/profil/outfits/$id': typeof ProfilOutfitsIdRoute
   '/profil/outfits/neu': typeof ProfilOutfitsNeuRoute
@@ -144,6 +151,7 @@ export interface FileRoutesByTo {
   '/passwort-zuruecksetzen': typeof PasswortZuruecksetzenRoute
   '/profil': typeof ProfilRoute
   '/teil-hinzufuegen': typeof TeilHinzufuegenRoute
+  '/profil/einstellungen': typeof ProfilEinstellungenRoute
   '/profil/hinzufuegen': typeof ProfilHinzufuegenRoute
   '/profil/outfits/$id': typeof ProfilOutfitsIdRoute
   '/profil/outfits/neu': typeof ProfilOutfitsNeuRoute
@@ -164,6 +172,7 @@ export interface FileRoutesById {
   '/passwort-zuruecksetzen': typeof PasswortZuruecksetzenRoute
   '/profil': typeof ProfilRoute
   '/teil-hinzufuegen': typeof TeilHinzufuegenRoute
+  '/profil_/einstellungen': typeof ProfilEinstellungenRoute
   '/profil_/hinzufuegen': typeof ProfilHinzufuegenRoute
   '/profil_/outfits/$id': typeof ProfilOutfitsIdRoute
   '/profil_/outfits/neu': typeof ProfilOutfitsNeuRoute
@@ -185,6 +194,7 @@ export interface FileRouteTypes {
     | '/passwort-zuruecksetzen'
     | '/profil'
     | '/teil-hinzufuegen'
+    | '/profil/einstellungen'
     | '/profil/hinzufuegen'
     | '/profil/outfits/$id'
     | '/profil/outfits/neu'
@@ -204,6 +214,7 @@ export interface FileRouteTypes {
     | '/passwort-zuruecksetzen'
     | '/profil'
     | '/teil-hinzufuegen'
+    | '/profil/einstellungen'
     | '/profil/hinzufuegen'
     | '/profil/outfits/$id'
     | '/profil/outfits/neu'
@@ -223,6 +234,7 @@ export interface FileRouteTypes {
     | '/passwort-zuruecksetzen'
     | '/profil'
     | '/teil-hinzufuegen'
+    | '/profil_/einstellungen'
     | '/profil_/hinzufuegen'
     | '/profil_/outfits/$id'
     | '/profil_/outfits/neu'
@@ -243,6 +255,7 @@ export interface RootRouteChildren {
   PasswortZuruecksetzenRoute: typeof PasswortZuruecksetzenRoute
   ProfilRoute: typeof ProfilRoute
   TeilHinzufuegenRoute: typeof TeilHinzufuegenRoute
+  ProfilEinstellungenRoute: typeof ProfilEinstellungenRoute
   ProfilHinzufuegenRoute: typeof ProfilHinzufuegenRoute
   ProfilOutfitsIdRoute: typeof ProfilOutfitsIdRoute
   ProfilOutfitsNeuRoute: typeof ProfilOutfitsNeuRoute
@@ -330,6 +343,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeilHinzufuegenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/profil_/einstellungen': {
+      id: '/profil_/einstellungen'
+      path: '/profil/einstellungen'
+      fullPath: '/profil/einstellungen'
+      preLoaderRoute: typeof ProfilEinstellungenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/profil_/hinzufuegen': {
       id: '/profil_/hinzufuegen'
       path: '/profil/hinzufuegen'
@@ -387,6 +407,7 @@ const rootRouteChildren: RootRouteChildren = {
   PasswortZuruecksetzenRoute: PasswortZuruecksetzenRoute,
   ProfilRoute: ProfilRoute,
   TeilHinzufuegenRoute: TeilHinzufuegenRoute,
+  ProfilEinstellungenRoute: ProfilEinstellungenRoute,
   ProfilHinzufuegenRoute: ProfilHinzufuegenRoute,
   ProfilOutfitsIdRoute: ProfilOutfitsIdRoute,
   ProfilOutfitsNeuRoute: ProfilOutfitsNeuRoute,

@@ -1,4 +1,5 @@
 import type { PrismaClient } from "../generated/prisma/client";
+import { createAccountRepository } from "./account";
 import { createForwardingAliasRepository } from "./forwarding-aliases";
 import { createItemRepository } from "./items";
 import { createOutfitRepository } from "./outfits";
@@ -12,6 +13,7 @@ export function createRepositories(prisma: PrismaClient) {
     receipts: createReceiptRepository(prisma),
     outfits: createOutfitRepository(prisma),
     forwardingAliases: createForwardingAliasRepository(prisma),
+    account: createAccountRepository(prisma),
   };
 }
 

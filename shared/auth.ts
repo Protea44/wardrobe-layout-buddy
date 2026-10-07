@@ -19,15 +19,19 @@ export const signInSchema = z.object({
   password: z.string().min(1, "Bitte gib dein Passwort ein."),
 });
 
+const name = z
+  .string()
+  .trim()
+  .min(1, "Bitte gib deinen Namen ein.")
+  .max(100, "Der Name darf höchstens 100 Zeichen haben.");
+
 export const signUpSchema = z.object({
-  name: z
-    .string()
-    .trim()
-    .min(1, "Bitte gib deinen Namen ein.")
-    .max(100, "Der Name darf höchstens 100 Zeichen haben."),
+  name,
   email,
   password: newPassword,
 });
+
+export const profileNameSchema = z.object({ name });
 
 export const requestPasswordResetSchema = z.object({ email });
 
@@ -35,5 +39,6 @@ export const resetPasswordSchema = z.object({ password: newPassword });
 
 export type SignInInput = z.infer<typeof signInSchema>;
 export type SignUpInput = z.infer<typeof signUpSchema>;
+export type ProfileNameInput = z.infer<typeof profileNameSchema>;
 export type RequestPasswordResetInput = z.infer<typeof requestPasswordResetSchema>;
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;

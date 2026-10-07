@@ -10,6 +10,7 @@ import { frontendPlugin } from "./plugins/frontend";
 import { prismaPlugin } from "./plugins/prisma";
 import { securityPlugin } from "./plugins/security";
 import { storagePlugin } from "./plugins/storage";
+import { accountRoutes } from "./routes/account";
 import { authRoutes } from "./routes/auth";
 import { filesRoutes } from "./routes/files";
 import { healthRoutes } from "./routes/health";
@@ -44,6 +45,7 @@ export async function buildApp({ config, storage, mailer, logStream }: BuildAppO
     async (api) => {
       await api.register(healthRoutes);
       await api.register(authRoutes, { config });
+      await api.register(accountRoutes, { config });
       await api.register(filesRoutes, { config });
       await api.register(itemsRoutes, { config });
       await api.register(outfitsRoutes);
