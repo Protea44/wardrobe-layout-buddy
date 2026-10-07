@@ -167,21 +167,21 @@
 
   .hero-art { position: relative; width: 100%; max-width: 400px; aspect-ratio: 7 / 8; margin-inline: auto; }
   .hero-art span { position: absolute; display: block; }
-  .hero-art-frame { inset: 0; border: 1px solid oklch(from var(--gold) l c h / 45%); }
-  .hero-art-accent { left: -20px; top: -20px; width: 76px; height: 76px; border: 1px solid oklch(from var(--gold) l c h / 22%); }
-  .hero-art-divider { left: 52%; top: 0; bottom: 0; border-left: 1px solid oklch(from var(--gold) l c h / 30%); }
-  .hero-art-rail { left: 8%; right: 52%; top: 26%; border-top: 1px solid oklch(from var(--gold) l c h / 40%); }
-  .hero-art-garment { top: 26%; border: 1px solid oklch(from var(--gold) l c h / 40%); border-radius: 6px 6px 0 0; }
+  .hero-art-frame { inset: 0; border: 1px solid oklch(from var(--gold) l c h / 60%); }
+  .hero-art-accent { left: -20px; top: -20px; width: 76px; height: 76px; border: 1px solid oklch(from var(--gold) l c h / 30%); }
+  .hero-art-divider { left: 52%; top: 0; bottom: 0; border-left: 1px solid oklch(from var(--gold) l c h / 42%); }
+  .hero-art-rail { left: 8%; right: 52%; top: 26%; border-top: 1px solid oklch(from var(--gold) l c h / 55%); }
+  .hero-art-garment { top: 26%; border: 1px solid oklch(from var(--gold) l c h / 55%); border-radius: 6px 6px 0 0; }
   .hero-art-garment--a { left: 14%; width: 13%; height: 40%; }
   .hero-art-garment--b { left: 31%; width: 11%; height: 30%; }
-  .hero-art-shelf { left: 56%; right: 8%; border-top: 1px solid oklch(from var(--gold) l c h / 30%); }
+  .hero-art-shelf { left: 56%; right: 8%; border-top: 1px solid oklch(from var(--gold) l c h / 45%); }
   .hero-art-shelf--a { top: 34%; }
   .hero-art-shelf--b { top: 56%; }
   .hero-art-shelf--c { top: 78%; }
-  .hero-art-box { border: 1px solid oklch(from var(--gold) l c h / 55%); }
+  .hero-art-box { border: 1px solid oklch(from var(--gold) l c h / 70%); }
   .hero-art-box--a { left: 60%; top: 19%; width: 26%; height: 14%; }
   .hero-art-box--b { left: 62%; top: 41%; width: 22%; height: 14%; }
-  .hero-art-drawer { bottom: 7%; height: 12%; border: 1px solid oklch(from var(--gold) l c h / 45%); }
+  .hero-art-drawer { bottom: 7%; height: 12%; border: 1px solid oklch(from var(--gold) l c h / 60%); }
   .hero-art-drawer--a { left: 8%; width: 40%; }
   .hero-art-drawer--b { left: 52%; width: 40%; }
   .hero-art-handle { left: 50%; top: 50%; width: 18px; height: 1px; margin-left: -9px; background: oklch(from var(--gold) l c h / 70%); }
