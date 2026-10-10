@@ -45,6 +45,53 @@ const itemFields = {
 
 export const itemCreateSchema = z.object(itemFields).strict();
 
+// Quick-select lists of the capture form. The columns stay free text, so the
+// lists can change without touching stored items.
+export const itemCategories = [
+  "Oberteil",
+  "Hose",
+  "Rock",
+  "Kleid",
+  "Jacke & Mantel",
+  "Strick",
+  "Schuhe",
+  "Tasche",
+  "Accessoire",
+  "Sonstiges",
+] as const;
+
+export const itemColors = [
+  "Schwarz",
+  "Weiß",
+  "Grau",
+  "Beige",
+  "Braun",
+  "Navy",
+  "Blau",
+  "Grün",
+  "Rot",
+  "Rosa",
+  "Gelb",
+  "Orange",
+  "Lila",
+  "Mehrfarbig",
+] as const;
+
+export const itemCategorySchema = z.enum(itemCategories);
+export const itemColorSchema = z.enum(itemColors);
+
+// Largest photo or thumbnail file POST /api/items accepts.
+export const ITEM_PHOTO_MAX_BYTES = 10 * 1024 * 1024;
+
+// The "data" part (JSON) of POST /api/items, sent next to the "photo" and
+// "thumbnail" files. Category and color must come from the lists above.
+export const itemUploadSchema = itemCreateSchema
+  .extend({
+    category: itemCategorySchema,
+    color: clearable(itemColorSchema),
+  })
+  .strict();
+
 export const itemUpdateSchema = z
   .object({
     ...itemFields,
@@ -84,6 +131,9 @@ export const itemResponseSchema = z.object({
 export type Season = z.infer<typeof seasonSchema>;
 export type Visibility = z.infer<typeof visibilitySchema>;
 export type LifecycleStatus = z.infer<typeof lifecycleStatusSchema>;
+export type ItemCategory = z.infer<typeof itemCategorySchema>;
+export type ItemColor = z.infer<typeof itemColorSchema>;
+export type ItemUploadInput = z.infer<typeof itemUploadSchema>;
 export type ItemCreateInput = z.infer<typeof itemCreateSchema>;
 export type ItemUpdateInput = z.infer<typeof itemUpdateSchema>;
 export type ItemResponse = z.infer<typeof itemResponseSchema>;

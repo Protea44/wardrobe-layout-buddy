@@ -12,6 +12,7 @@ import { ConsentManager } from "@/components/consent/consent-manager";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { Button } from "@/components/ui/button";
+import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
   return (
@@ -78,6 +79,7 @@ function RootComponent() {
         </main>
         <Footer />
         <ConsentManager />
+        <Toaster position="top-center" />
       </div>
     </QueryClientProvider>
   );

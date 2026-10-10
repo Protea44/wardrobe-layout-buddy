@@ -3,7 +3,7 @@ import type { FastifyReply } from "fastify";
 import type { ApiError } from "@shared/api-error";
 
 // Same shape as Fastify's own error responses, so clients parse one format.
-function sendError(reply: FastifyReply, statusCode: number, error: string, message: string) {
+export function sendError(reply: FastifyReply, statusCode: number, error: string, message: string) {
   const body: ApiError = { statusCode, error, message };
   return reply.code(statusCode).send(body);
 }
@@ -14,4 +14,8 @@ export function sendUnauthorized(reply: FastifyReply) {
 
 export function sendNotFound(reply: FastifyReply) {
   return sendError(reply, 404, "Not Found", "Not found");
+}
+
+export function sendBadRequest(reply: FastifyReply, message = "Invalid request") {
+  return sendError(reply, 400, "Bad Request", message);
 }

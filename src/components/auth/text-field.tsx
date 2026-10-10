@@ -15,7 +15,10 @@ type TextFieldProps<T extends FieldValues> = {
   name: FieldPath<T>;
   label: string;
   hint?: string;
-} & Pick<ComponentProps<"input">, "type" | "autoComplete">;
+} & Pick<
+  ComponentProps<"input">,
+  "type" | "autoComplete" | "inputMode" | "maxLength" | "placeholder"
+>;
 
 export function TextField<T extends FieldValues>({
   control,

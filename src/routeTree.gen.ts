@@ -19,6 +19,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as PasswortVergessenRouteImport } from './routes/passwort-vergessen'
 import { Route as PasswortZuruecksetzenRouteImport } from './routes/passwort-zuruecksetzen'
 import { Route as ProfilRouteImport } from './routes/profil'
+import { Route as TeilHinzufuegenRouteImport } from './routes/teil-hinzufuegen'
 import { Route as ProfilIndexRouteImport } from './routes/profil/index'
 import { Route as ProfilEinstellungenRouteImport } from './routes/profil/einstellungen'
 import { Route as ProfilHinzufuegenRouteImport } from './routes/profil/hinzufuegen'
@@ -75,6 +76,11 @@ const ProfilRoute = ProfilRouteImport.update({
   path: '/profil',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TeilHinzufuegenRoute = TeilHinzufuegenRouteImport.update({
+  id: '/teil-hinzufuegen',
+  path: '/teil-hinzufuegen',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProfilIndexRoute = ProfilIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -112,6 +118,7 @@ export interface FileRoutesByFullPath {
   '/passwort-vergessen': typeof PasswortVergessenRoute
   '/passwort-zuruecksetzen': typeof PasswortZuruecksetzenRoute
   '/profil': typeof ProfilRouteWithChildren
+  '/teil-hinzufuegen': typeof TeilHinzufuegenRoute
   '/profil/einstellungen': typeof ProfilEinstellungenRoute
   '/profil/hinzufuegen': typeof ProfilHinzufuegenRoute
   '/profil/outfits': typeof ProfilOutfitsRoute
@@ -128,6 +135,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/passwort-vergessen': typeof PasswortVergessenRoute
   '/passwort-zuruecksetzen': typeof PasswortZuruecksetzenRoute
+  '/teil-hinzufuegen': typeof TeilHinzufuegenRoute
   '/profil/einstellungen': typeof ProfilEinstellungenRoute
   '/profil/hinzufuegen': typeof ProfilHinzufuegenRoute
   '/profil/outfits': typeof ProfilOutfitsRoute
@@ -146,6 +154,7 @@ export interface FileRoutesById {
   '/passwort-vergessen': typeof PasswortVergessenRoute
   '/passwort-zuruecksetzen': typeof PasswortZuruecksetzenRoute
   '/profil': typeof ProfilRouteWithChildren
+  '/teil-hinzufuegen': typeof TeilHinzufuegenRoute
   '/profil/einstellungen': typeof ProfilEinstellungenRoute
   '/profil/hinzufuegen': typeof ProfilHinzufuegenRoute
   '/profil/outfits': typeof ProfilOutfitsRoute
@@ -165,6 +174,7 @@ export interface FileRouteTypes {
     | '/passwort-vergessen'
     | '/passwort-zuruecksetzen'
     | '/profil'
+    | '/teil-hinzufuegen'
     | '/profil/einstellungen'
     | '/profil/hinzufuegen'
     | '/profil/outfits'
@@ -181,6 +191,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/passwort-vergessen'
     | '/passwort-zuruecksetzen'
+    | '/teil-hinzufuegen'
     | '/profil/einstellungen'
     | '/profil/hinzufuegen'
     | '/profil/outfits'
@@ -198,6 +209,7 @@ export interface FileRouteTypes {
     | '/passwort-vergessen'
     | '/passwort-zuruecksetzen'
     | '/profil'
+    | '/teil-hinzufuegen'
     | '/profil/einstellungen'
     | '/profil/hinzufuegen'
     | '/profil/outfits'
@@ -216,6 +228,7 @@ export interface RootRouteChildren {
   PasswortVergessenRoute: typeof PasswortVergessenRoute
   PasswortZuruecksetzenRoute: typeof PasswortZuruecksetzenRoute
   ProfilRoute: typeof ProfilRouteWithChildren
+  TeilHinzufuegenRoute: typeof TeilHinzufuegenRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -290,6 +303,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfilRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/teil-hinzufuegen': {
+      id: '/teil-hinzufuegen'
+      path: '/teil-hinzufuegen'
+      fullPath: '/teil-hinzufuegen'
+      preLoaderRoute: typeof TeilHinzufuegenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/profil/': {
       id: '/profil/'
       path: '/'
@@ -358,6 +378,7 @@ const rootRouteChildren: RootRouteChildren = {
   PasswortVergessenRoute: PasswortVergessenRoute,
   PasswortZuruecksetzenRoute: PasswortZuruecksetzenRoute,
   ProfilRoute: ProfilRouteWithChildren,
+  TeilHinzufuegenRoute: TeilHinzufuegenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
