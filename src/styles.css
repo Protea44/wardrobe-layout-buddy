@@ -229,7 +229,7 @@
   .form-details-fields { display: grid; gap: 22px; padding-bottom: 28px; }
 
   /* Stays reachable for the thumb while scrolling through a long form. */
-  .item-form-actions { position: sticky; bottom: var(--consent-banner-height, 0px); z-index: 10; margin-inline: -8px; padding: 12px 8px calc(12px + env(safe-area-inset-bottom)); background: var(--white); border-top: 1px solid var(--gold); }
+  .item-form-actions { position: sticky; bottom: calc(var(--consent-banner-height, 0px) + var(--tabbar-height, 0px)); z-index: 10; margin-inline: -8px; padding: 12px 8px calc(12px + env(safe-area-inset-bottom)); background: var(--white); border-top: 1px solid var(--gold); }
   .upload-progress { margin-bottom: 12px; }
   .upload-progress-text { margin-top: 6px; font-size: 13px; color: var(--muted-foreground); }
 
