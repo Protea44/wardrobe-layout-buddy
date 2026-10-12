@@ -1,5 +1,5 @@
 import { Camera, ImagePlus, Images } from "lucide-react";
-import { useRef, useState, type ChangeEvent, type DragEvent, type Ref } from "react";
+import { useId, useRef, useState, type ChangeEvent, type DragEvent, type Ref } from "react";
 
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -11,10 +11,19 @@ type PhotoInputProps = {
   onSelect: (file: File) => void;
   // Receives the main button, so the form can move focus to it.
   triggerRef?: Ref<HTMLButtonElement>;
+  // Optional photos are labelled as such.
+  required?: boolean;
 };
 
 // Camera on phones, drag and drop or file picker on larger screens.
-export function PhotoInput({ previewUrl, busy, error, onSelect, triggerRef }: PhotoInputProps) {
+export function PhotoInput({
+  previewUrl,
+  busy,
+  error,
+  onSelect,
+  triggerRef,
+  required = true,
+}: PhotoInputProps) {
   const isMobile = useIsMobile();
   const cameraInput = useRef<HTMLInputElement>(null);
   const fileInput = useRef<HTMLInputElement>(null);
@@ -35,12 +44,12 @@ export function PhotoInput({ previewUrl, busy, error, onSelect, triggerRef }: Ph
   }
 
   const hasPhoto = previewUrl !== null;
-  const errorId = "photo-error";
+  const errorId = `${useId()}-error`;
 
   return (
     <fieldset className="photo-input" aria-describedby={error ? errorId : undefined}>
       <legend className="field-legend">
-        Foto <span className="field-required">(Pflichtfeld)</span>
+        Foto <span className="field-required">{required ? "(Pflichtfeld)" : "(optional)"}</span>
       </legend>
 
       <input

@@ -19,3 +19,7 @@ export function sendNotFound(reply: FastifyReply) {
 export function sendBadRequest(reply: FastifyReply, message = "Invalid request") {
   return sendError(reply, 400, "Bad Request", message);
 }
+
+export function sendUnsupportedMediaType(reply: FastifyReply, message: string) {
+  return sendError(reply, 415, "Unsupported Media Type", message);
+}

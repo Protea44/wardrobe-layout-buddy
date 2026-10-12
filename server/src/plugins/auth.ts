@@ -16,7 +16,7 @@ declare module "fastify" {
 }
 
 type AuthOptions = {
-  config: Pick<AppConfig, "APP_URL" | "BETTER_AUTH_SECRET">;
+  config: Pick<AppConfig, "APP_URL" | "BETTER_AUTH_SECRET" | "NODE_ENV">;
   mailer: Mailer;
 };
 

@@ -1,7 +1,9 @@
 import type {
+  ParseStatus,
   ReceiptCreateInput,
   ReceiptResponse,
   ReceiptSource,
+  ReceiptSummary,
   ReceiptUpdateInput,
 } from "@shared/receipt";
 
@@ -34,6 +36,8 @@ type NewReceipt = ReceiptCreateInput & {
   id: string;
   fileKey: string;
   source: ReceiptSource;
+  // PENDING by default: waiting for the parser.
+  parseStatus?: ParseStatus;
   receivedAt?: Date;
 };
 
@@ -53,6 +57,7 @@ export function createReceiptRepository(prisma: PrismaClient) {
             merchant: input.merchant,
             purchaseDate: fromDateOnly(input.purchaseDate),
             receivedAt: input.receivedAt,
+            parseStatus: input.parseStatus,
           }),
         },
       });
@@ -70,6 +75,19 @@ export function createReceiptRepository(prisma: PrismaClient) {
         orderBy: [{ receivedAt: "desc" }, { id: "asc" }],
       });
       return receipts.map(toResponse);
+    },
+
+    // Like list, with the number of items linked to each receipt.
+    async listSummaries(userId: string): Promise<ReceiptSummary[]> {
+      const receipts = await prisma.receipt.findMany({
+        where: { userId },
+        orderBy: [{ receivedAt: "desc" }, { id: "asc" }],
+        include: { _count: { select: { items: true } } },
+      });
+      return receipts.map(({ _count, ...receipt }) => ({
+        ...toResponse(receipt),
+        itemCount: _count.items,
+      }));
     },
 
     // Null if the receipt does not exist for this user. Details entered by

@@ -1,9 +1,7 @@
-import { Readable } from "node:stream";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
 import { ITEM_PHOTO_MAX_BYTES, itemResponseSchema, type ItemResponse } from "@shared/item";
 
-import type { Storage } from "../lib/storage";
 import { newRecordId, storageKey } from "../lib/storage-keys";
 import {
   browserHeaders,
@@ -13,37 +11,7 @@ import {
   type TestApp,
   type TestUser,
 } from "../test/build-test-app";
-
-// Keeps objects in memory, so tests can look at what was stored.
-function createMemoryStorage() {
-  const objects = new Map<string, { body: Uint8Array; contentType: string }>();
-  const storage: Storage = {
-    putObject: (bucket, key, body, contentType) => {
-      objects.set(`${bucket}/${key}`, { body, contentType });
-      return Promise.resolve();
-    },
-    getObjectStream: (bucket, key) => {
-      const object = objects.get(`${bucket}/${key}`);
-      if (!object) return Promise.resolve(null);
-      return Promise.resolve({
-        stream: Readable.from([Buffer.from(object.body)]),
-        contentType: object.contentType,
-        contentLength: object.body.byteLength,
-      });
-    },
-    deleteObject: (bucket, key) => {
-      objects.delete(`${bucket}/${key}`);
-      return Promise.resolve();
-    },
-    deletePrefix: (bucket, prefix) => {
-      for (const key of objects.keys()) {
-        if (key.startsWith(`${bucket}/${prefix}`)) objects.delete(key);
-      }
-      return Promise.resolve();
-    },
-  };
-  return { storage, objects };
-}
+import { createMemoryStorage } from "../test/memory-storage";
 
 const ascii = (value: string) => [...value].map((char) => char.charCodeAt(0));
 
@@ -234,6 +202,41 @@ describe("POST /api/items", () => {
     expect(large.statusCode).toBe(201);
     expect(tooLarge.statusCode).toBe(413);
     expect(await app.repositories.items.list(a.userId)).toHaveLength(1);
+  });
+
+  it("returns the existing item when a create with the same client id is retried", async () => {
+    const id = "7b0c1f2a-3d4e-4f50-8a6b-9c0d1e2f3a4b";
+    const data = { id, name: "Blau Oberteil", category: "Oberteil" };
+
+    const first = await upload(a.cookie, { data });
+    const retry = await upload(a.cookie, { data });
+
+    expect(first.statusCode).toBe(201);
+    expect(retry.statusCode).toBe(200);
+    expect(retry.json<ItemResponse>()).toEqual(first.json<ItemResponse>());
+    expect(first.json<ItemResponse>().id).toBe(id);
+    expect(await app.repositories.items.list(a.userId)).toHaveLength(1);
+    expect(memory.objects.size).toBe(2);
+  });
+
+  it("answers 404 when the client id belongs to another user's item", async () => {
+    const id = "7b0c1f2a-3d4e-4f50-8a6b-9c0d1e2f3a4c";
+    await upload(a.cookie, { data: { id, name: "Hemd", category: "Oberteil" } });
+    const before = memory.objects.size;
+
+    const response = await upload(b.cookie, { data: { id, name: "Fremd", category: "Oberteil" } });
+
+    expect(response.statusCode).toBe(404);
+    expect(memory.objects.size).toBe(before);
+    expect(await app.repositories.items.list(b.userId)).toEqual([]);
+    expect((await app.repositories.items.get(a.userId, id))?.name).toBe("Hemd");
+  });
+
+  it("refuses a client id that is not a UUID", async () => {
+    const response = await upload(a.cookie, {
+      data: { id: "../other", name: "Hemd", category: "Oberteil" },
+    });
+    expect(response.statusCode).toBe(400);
   });
 
   it("refuses a JSON body", async () => {

@@ -36,11 +36,20 @@ export const filesRoutes: FastifyPluginAsync<FilesOptions> = async (app, { confi
     const object = await app.storage.getObjectStream(buckets[params.data.bucket], params.data["*"]);
     if (object === null) return sendNotFound(reply);
 
+    const contentType = object.contentType ?? "application/octet-stream";
+    const filename = params.data["*"].split("/").pop() ?? "datei";
     reply
       .header("Cache-Control", "private, max-age=300")
-      // Uploaded content must never run as a document on our origin.
-      .header("Content-Security-Policy", "default-src 'none'; sandbox")
-      .type(object.contentType ?? "application/octet-stream");
+      // Uploaded content must never run as a document on our origin. Browsers
+      // refuse to show PDFs in a sandboxed document, so PDFs only lose every
+      // resource; their viewer does not run scripts on our origin.
+      .header(
+        "Content-Security-Policy",
+        contentType === "application/pdf" ? "default-src 'none'" : "default-src 'none'; sandbox",
+      )
+      // Shown in the browser tab (e.g. "Ansehen" in a new tab), not downloaded.
+      .header("Content-Disposition", `inline; filename="${filename}"`)
+      .type(contentType);
     if (object.contentLength !== undefined) reply.header("Content-Length", object.contentLength);
     return reply.send(object.stream);
   });

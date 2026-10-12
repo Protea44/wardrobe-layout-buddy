@@ -18,14 +18,26 @@ describe("App routing", () => {
   it("matches every page of the profile area below the /profil layout", () => {
     const router = createRouter({ routeTree, context: { queryClient: new QueryClient() } });
 
-    for (const path of [
-      "/profil/schrank",
-      "/profil/hinzufuegen",
-      "/profil/outfits",
-      "/profil/einstellungen",
-    ]) {
-      const routeIds = router.matchRoutes(path).map(({ routeId }) => routeId);
-      expect(routeIds, path).toEqual([rootRouteId, "/profil", path]);
+    // "/neu" has to win over an outfit id.
+    for (const [path, routeId] of [
+      ["/profil/schrank", "/profil/schrank/"],
+      ["/profil/schrank/abc", "/profil/schrank/$id"],
+      ["/profil/hinzufuegen", "/profil/hinzufuegen"],
+      ["/profil/outfits", "/profil/outfits/"],
+      ["/profil/outfits/neu", "/profil/outfits/neu"],
+      ["/profil/outfits/abc", "/profil/outfits/$id"],
+      ["/profil/einstellungen", "/profil/einstellungen"],
+    ] as const) {
+      const routeIds = router.matchRoutes(path, {}).map((match) => match.routeId);
+      expect(routeIds, path).toEqual([rootRouteId, "/profil", routeId]);
     }
+  });
+
+  it("matches the add page with the receipt tab", () => {
+    const router = createRouter({ routeTree, context: { queryClient: new QueryClient() } });
+
+    const matches = router.matchRoutes("/profil/hinzufuegen", { tab: "beleg" });
+
+    expect(matches.at(-1)?.routeId).toBe("/profil/hinzufuegen");
   });
 });

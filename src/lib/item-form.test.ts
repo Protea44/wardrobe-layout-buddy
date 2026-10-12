@@ -1,14 +1,17 @@
 import { describe, expect, it } from "vitest";
 
-import { itemUploadSchema } from "@shared/item";
+import { itemEditSchema, itemUploadSchema } from "@shared/item";
 
 import {
   defaultItemName,
   emptyItemForm,
   itemFormSchema,
+  itemToFormInput,
   normalizePrice,
+  toItemEditInput,
   toItemUploadInput,
 } from "@/lib/item-form";
+import { itemFixture } from "@/test/fixtures";
 
 describe("normalizePrice", () => {
   it.each([
@@ -78,5 +81,51 @@ describe("item form", () => {
       seasons: ["herbst", "winter"],
     });
     expect(itemUploadSchema.parse(input)).toEqual(input);
+  });
+});
+
+describe("editing an item", () => {
+  it("fills the form from the item, with a comma in the price", () => {
+    expect(itemToFormInput(itemFixture())).toEqual({
+      category: "Oberteil",
+      color: "Weiß",
+      name: "Leinenhemd",
+      brand: "Marke",
+      size: "M",
+      price: "49,90",
+      purchaseDate: "2026-05-01",
+      material: "Leinen",
+      retailer: "Modehaus",
+      seasons: ["sommer"],
+      notes: "Bügeln",
+    });
+  });
+
+  it("sends every field and clears the emptied ones", () => {
+    const values = itemFormSchema.parse({
+      ...itemToFormInput(itemFixture()),
+      name: "",
+      brand: "",
+      price: "39,50",
+      notes: "",
+      seasons: [],
+    });
+
+    const input = toItemEditInput(values);
+
+    expect(input).toEqual({
+      name: "Weiß Oberteil",
+      category: "Oberteil",
+      color: "Weiß",
+      brand: null,
+      size: "M",
+      price: "39.50",
+      purchaseDate: "2026-05-01",
+      material: "Leinen",
+      retailer: "Modehaus",
+      seasons: [],
+      notes: null,
+    });
+    expect(itemEditSchema.parse(input)).toEqual(input);
   });
 });

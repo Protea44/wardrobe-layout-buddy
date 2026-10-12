@@ -53,7 +53,9 @@ describe("outfit repository", () => {
       zIndex: 5,
     });
 
-    expect(moved?.items).toEqual([
+    expect(
+      moved?.items.map(({ itemId, x, y, scale, zIndex }) => ({ itemId, x, y, scale, zIndex })),
+    ).toEqual([
       { itemId: shirt.id, x: 0.25, y: 0.5, scale: 1, zIndex: 2 },
       { itemId: coat.id, x: 1, y: 0, scale: 1.5, zIndex: 5 },
     ]);

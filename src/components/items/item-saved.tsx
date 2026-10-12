@@ -4,8 +4,8 @@ import { useEffect, useRef } from "react";
 import type { ItemResponse } from "@shared/item";
 
 import { Button } from "@/components/ui/button";
-import { WARDROBE_PATH } from "@/config/items";
-import { itemPhotoUrl } from "@/lib/items-api";
+import { WARDROBE_PATH } from "@/config/wardrobe";
+import { StoredImage } from "@/components/stored-image";
 
 type ItemSavedProps = {
   item: ItemResponse;
@@ -21,9 +21,9 @@ export function ItemSaved({ item, onNext }: ItemSavedProps) {
   return (
     <section className="item-saved" aria-labelledby="item-saved-heading">
       {item.thumbnailKey !== null && (
-        <img
+        <StoredImage
           className="item-saved-photo"
-          src={itemPhotoUrl(item.thumbnailKey)}
+          storageKey={item.thumbnailKey}
           alt={`Foto: ${item.name}`}
         />
       )}

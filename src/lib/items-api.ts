@@ -1,66 +1,75 @@
-import { itemResponseSchema, type ItemResponse, type ItemUploadInput } from "@shared/item";
-
 import {
-  API_BASE,
-  ApiError,
-  errorForStatus,
-  NETWORK_ERROR_MESSAGE,
-  UNEXPECTED_RESPONSE_MESSAGE,
-} from "@/lib/api";
+  itemFacetsSchema,
+  itemListResponseSchema,
+  itemResponseSchema,
+  type ItemEditInput,
+  type ItemResponse,
+  type ItemUploadInput,
+} from "@shared/item";
+
+import { api, API_BASE } from "@/lib/api";
+import { photoFilename, postMultipart, type UploadOptions } from "@/lib/upload";
+import { itemListQuery, type WardrobeSearch } from "@/lib/wardrobe-search";
+
+export const itemQueryKeys = {
+  all: ["items"] as const,
+  list: (search: WardrobeSearch) => ["items", "list", search] as const,
+  facets: ["items", "facets"] as const,
+  detail: (id: string) => ["items", "detail", id] as const,
+};
 
 // Photos are only reachable through the authenticated files route.
 export function itemPhotoUrl(key: string) {
   return `${API_BASE}/files/item-photos/${key.split("/").map(encodeURIComponent).join("/")}`;
 }
 
-function extension(blob: Blob) {
-  return blob.type === "image/jpeg" ? "jpg" : "webp";
-}
-
-type UploadItemOptions = {
-  // Called with the uploaded share of the request, from 0 to 1.
-  onProgress?: (fraction: number) => void;
-};
-
-// POST /api/items as multipart/form-data. Uses XMLHttpRequest because fetch
-// cannot report upload progress.
+// POST /api/items with photo, thumbnail and the fields as JSON.
 export function uploadItem(
   input: { photo: Blob; thumbnail: Blob; fields: ItemUploadInput },
-  { onProgress }: UploadItemOptions = {},
+  options: UploadOptions = {},
 ): Promise<ItemResponse> {
   const form = new FormData();
   form.append("data", JSON.stringify(input.fields));
-  form.append("photo", input.photo, `photo.${extension(input.photo)}`);
-  form.append("thumbnail", input.thumbnail, `thumbnail.${extension(input.thumbnail)}`);
+  form.append("photo", input.photo, photoFilename("photo", input.photo));
+  form.append("thumbnail", input.thumbnail, photoFilename("thumbnail", input.thumbnail));
+  return postMultipart("/items", form, itemResponseSchema, options);
+}
 
-  return new Promise((resolve, reject) => {
-    const request = new XMLHttpRequest();
-    request.open("POST", `${API_BASE}/items`);
-    request.withCredentials = true;
-    request.setRequestHeader("Accept", "application/json");
+export function fetchItems(search: WardrobeSearch, cursor: string | null) {
+  return api(`/items${itemListQuery(search, cursor)}`, { schema: itemListResponseSchema });
+}
 
-    request.upload.addEventListener("progress", (event) => {
-      if (event.lengthComputable && event.total > 0) onProgress?.(event.loaded / event.total);
-    });
-    request.addEventListener("error", () => reject(new ApiError(NETWORK_ERROR_MESSAGE, null)));
-    request.addEventListener("load", () => {
-      let data: unknown;
-      try {
-        data =
-          request.responseText === "" ? undefined : (JSON.parse(request.responseText) as unknown);
-      } catch {
-        data = undefined;
-      }
+export function fetchItemFacets() {
+  return api("/items/facets", { schema: itemFacetsSchema });
+}
 
-      if (request.status < 200 || request.status >= 300) {
-        reject(errorForStatus(request.status, data));
-        return;
-      }
-      const parsed = itemResponseSchema.safeParse(data);
-      if (parsed.success) resolve(parsed.data);
-      else reject(new ApiError(UNEXPECTED_RESPONSE_MESSAGE, request.status));
-    });
+export function fetchItem(id: string) {
+  return api(`/items/${encodeURIComponent(id)}`, { schema: itemResponseSchema });
+}
 
-    request.send(form);
+export function updateItem(id: string, input: ItemEditInput) {
+  return api(`/items/${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    body: input,
+    schema: itemResponseSchema,
+  });
+}
+
+export async function deleteItem(id: string) {
+  await api(`/items/${encodeURIComponent(id)}`, { method: "DELETE" });
+}
+
+// PUT /api/items/:id/photo with a new photo and thumbnail.
+export function replaceItemPhoto(
+  id: string,
+  input: { photo: Blob; thumbnail: Blob },
+  options: UploadOptions = {},
+): Promise<ItemResponse> {
+  const form = new FormData();
+  form.append("photo", input.photo, photoFilename("photo", input.photo));
+  form.append("thumbnail", input.thumbnail, photoFilename("thumbnail", input.thumbnail));
+  return postMultipart(`/items/${encodeURIComponent(id)}/photo`, form, itemResponseSchema, {
+    ...options,
+    method: "PUT",
   });
 }

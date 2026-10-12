@@ -23,6 +23,7 @@ export function MobileNavigation() {
         <Button
           variant="mobileTrigger"
           size="icon"
+          className="h-11 w-11"
           aria-label="Menü öffnen"
           aria-expanded={open}
           aria-controls="mobile-navigation"
@@ -40,7 +41,7 @@ export function MobileNavigation() {
           <div className="mobile-panel-top">
             <Dialog.Title className="mobile-panel-title">Navigation</Dialog.Title>
             <Dialog.Close asChild>
-              <Button variant="menu" size="icon" aria-label="Menü schließen">
+              <Button variant="menu" size="icon" className="h-11 w-11" aria-label="Menü schließen">
                 <X aria-hidden="true" />
               </Button>
             </Dialog.Close>

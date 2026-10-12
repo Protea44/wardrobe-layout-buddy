@@ -16,6 +16,8 @@ const configSchema = z.object({
   TRUST_PROXY: booleanString.default("false"),
   RATE_LIMIT_MAX: z.coerce.number().int().positive().default(300),
   AUTH_RATE_LIMIT_MAX: z.coerce.number().int().positive().default(20),
+  // Data exports per hour and client; each one reads every file of the user.
+  EXPORT_RATE_LIMIT_MAX: z.coerce.number().int().positive().default(5),
   BODY_LIMIT_BYTES: z.coerce.number().int().positive().default(1_048_576),
   FRONTEND_DIR: z.string().min(1).default(path.join(repoRoot, "dist")),
 
@@ -38,6 +40,16 @@ const configSchema = z.object({
   S3_FORCE_PATH_STYLE: booleanString.default("true"),
   S3_BUCKET_ITEM_PHOTOS: z.string().min(1).default("item-photos"),
   S3_BUCKET_RECEIPTS: z.string().min(1).default("receipts"),
+
+  // Domain of the receipt forwarding addresses, {alias}@RECEIPT_EMAIL_DOMAIN.
+  RECEIPT_EMAIL_DOMAIN: z
+    .string()
+    .regex(/^[a-z0-9-]+(\.[a-z0-9-]+)+$/, "must be a lower-case domain")
+    .default("belege.kleiderschrank-kompakt.de"),
+  // Shared secret the mail provider sends in x-inbound-secret. Without it,
+  // POST /api/inbound/receipt refuses every request.
+  INBOUND_SECRET: z.string().min(32).optional(),
+  INBOUND_RATE_LIMIT_MAX: z.coerce.number().int().positive().default(30),
 
   SMTP_HOST: z.string().min(1),
   SMTP_PORT: z.coerce.number().int().min(1).max(65535),

@@ -23,6 +23,11 @@ export function isRecordNotFound(error: unknown) {
   return error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025";
 }
 
+// Prisma's "unique constraint failed", e.g. a client id that already exists.
+export function isUniqueViolation(error: unknown) {
+  return error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002";
+}
+
 // Drops keys whose value is undefined, so "not sent" never overwrites a column.
 export function defined<T extends Record<string, unknown>>(values: T) {
   return Object.fromEntries(Object.entries(values).filter(([, value]) => value !== undefined)) as {

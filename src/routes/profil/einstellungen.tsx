@@ -1,54 +1,52 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
-import { AuthMessage } from "@/components/auth/auth-page";
-import { Button } from "@/components/ui/button";
-import { authErrorMessage } from "@/config/auth";
+import { useQuery } from "@tanstack/react-query";
+import { createFileRoute } from "@tanstack/react-router";
+
+import { DeleteAccountSection } from "@/components/settings/delete-account-section";
+import { ExportSection } from "@/components/settings/export-section";
+import { PrivacySection } from "@/components/settings/privacy-section";
+import { ProfileSection } from "@/components/settings/profile-section";
 import { pageHead } from "@/config/site";
-import { authClient } from "@/lib/auth-client";
+import { accountQueryKey, fetchAccount } from "@/lib/account-api";
+import { ApiError } from "@/lib/api";
+import { isNetworkError } from "@/lib/offline/online";
 
 export const Route = createFileRoute("/profil/einstellungen")({
   head: () =>
-    pageHead("Einstellungen", "Die Einstellungen deines Kontos bei Kleiderschrank Kompakt."),
+    pageHead("Einstellungen", "Profil, Privatsphäre, Datenexport und Löschung deines Kontos."),
   component: SettingsPage,
 });
 
 function SettingsPage() {
-  const { me } = Route.useRouteContext();
-  const navigate = useNavigate();
-  const [error, setError] = useState<string | null>(null);
-  const [pending, setPending] = useState(false);
-
-  async function signOut() {
-    setError(null);
-    setPending(true);
-    const result = await authClient.signOut();
-    setPending(false);
-    if (result.error) {
-      setError(authErrorMessage(result.error));
-      return;
-    }
-    await navigate({ to: "/" });
-  }
+  const account = useQuery({ queryKey: accountQueryKey, queryFn: fetchAccount });
 
   return (
-    <div className="site-container page-body">
+    <div className="site-container page-body settings-page">
       <h1 className="page-title">Einstellungen</h1>
-      <dl className="profile-details">
-        <dt>Name</dt>
-        <dd>{me.displayName}</dd>
-        <dt>E-Mail-Adresse</dt>
-        <dd>{me.email}</dd>
-      </dl>
-      {error !== null && <AuthMessage>{error}</AuthMessage>}
-      <Button
-        type="button"
-        variant="outline"
-        className="profile-sign-out h-11 px-6"
-        onClick={signOut}
-        disabled={pending}
-      >
-        Abmelden
-      </Button>
+      <div className="settings-sections">
+        {account.data ? (
+          <ProfileSection account={account.data} />
+        ) : (
+          <section className="settings-section" aria-labelledby="settings-profile">
+            <h2 id="settings-profile" className="receipt-section-title">
+              Profil
+            </h2>
+            {account.isPending && <p className="receipt-muted">Wird geladen …</p>}
+            {account.isError && (
+              <p className="form-error" role="alert">
+                {isNetworkError(account.error)
+                  ? "Dein Profil ist offline nicht verfügbar."
+                  : account.error instanceof ApiError
+                    ? account.error.message
+                    : "Deine Einstellungen konnten nicht geladen werden."}
+              </p>
+            )}
+          </section>
+        )}
+        {/* Privacy and export work without the profile; both explain themselves offline. */}
+        <PrivacySection />
+        <ExportSection />
+        <DeleteAccountSection account={account.data ?? null} />
+      </div>
     </div>
   );
 }

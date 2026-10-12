@@ -25,6 +25,12 @@ export const storageEntries = [
     duration: "12 Monate",
   },
   {
+    name: "Offline-Speicher (IndexedDB)",
+    purpose: "Nutzung deines Schranks ohne Internet",
+    category: "Notwendig",
+    duration: "bis zur Abmeldung",
+  },
+  {
     name: "Supabase-Sitzung",
     purpose: "Hält dich angemeldet",
     category: "Notwendig",

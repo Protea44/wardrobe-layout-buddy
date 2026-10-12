@@ -19,3 +19,6 @@ export const dateOnlySchema = z
 export const timestampSchema = z.string().datetime();
 
 export const idSchema = z.string().min(1).max(64);
+
+// Id a client generates for a new record, so a retried create never duplicates it.
+export const clientIdSchema = z.string().uuid();

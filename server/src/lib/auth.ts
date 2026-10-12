@@ -9,7 +9,7 @@ import type { PrismaClient } from "../generated/prisma/client";
 import type { Mailer } from "./mailer";
 
 type AuthDependencies = {
-  config: Pick<AppConfig, "APP_URL" | "BETTER_AUTH_SECRET">;
+  config: Pick<AppConfig, "APP_URL" | "BETTER_AUTH_SECRET" | "NODE_ENV">;
   prisma: PrismaClient;
   mailer: Mailer;
   log: FastifyBaseLogger;
@@ -64,6 +64,9 @@ export function createAuth({ config, prisma, mailer, log }: AuthDependencies) {
 
     advanced: {
       cookiePrefix: "kk",
+      // Session cookies are always Secure in production, whatever APP_URL says.
+      // (Better Auth sets HttpOnly and SameSite=Lax itself.)
+      useSecureCookies: config.NODE_ENV === "production",
       // Explicit, because Better Auth otherwise switches the origin check off
       // under NODE_ENV=test and the tests would not cover what production runs.
       disableOriginCheck: false,

@@ -20,7 +20,7 @@ function BuyingPage() {
       </p>
       <hr className="gold-divider" />
       <Button asChild className="h-12 px-9 text-base">
-        <Link to="/profil">Zu meinem Schrank</Link>
+        <Link to="/profil/schrank">Zu meinem Schrank</Link>
       </Button>
     </div>
   );
